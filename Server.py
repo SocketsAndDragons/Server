@@ -15,7 +15,12 @@ def main():
     print("welcome to sockets and dragons! server is listening on port", port)
     shell = createNewShell()
     server, server_thread = start_server(host, port, shell)
-    shell.run()
+    try:
+        shell.run()
+    except Exception as e:
+        print(e)
+        print("an unhandled error occured")
+
     print("killing server thread")
     server.stop()
     server_thread.join(6000)
@@ -43,8 +48,9 @@ class Server:
         self.alive = True
 
     def start(self):
-        while self.alive:
+        while True:
             time.sleep(5)
+            if not self.alive: break
             self.shell.execute('help', ['help'])
 
     def stop(self):
