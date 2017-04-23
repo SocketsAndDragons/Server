@@ -32,28 +32,22 @@ class MapTest(unittest.TestCase):
         assert not myRoom.has_west_door()
 
     def testRoomHasOnlySouthDoor(self):
-        myRoom = room.Room(room.EAST)
+        myRoom = room.Room(room.SOUTH)
         assert not myRoom.has_north_door()
         assert not myRoom.has_east_door()
         assert myRoom.has_south_door()
         assert not myRoom.has_west_door()
 
     def testRoomHasOnlyWestDoor(self):
-        myRoom = room.Room(room.EAST)
+        myRoom = room.Room(room.WEST)
         assert not myRoom.has_north_door()
         assert not myRoom.has_east_door()
         assert not myRoom.has_south_door()
         assert myRoom.has_west_door()
 
     def testRoomHasTwoDoors(self):
-        myRoom = room.Room(room.EAST & room.NORTH)
-        assert myRoom.has_north_door()
-        assert myRoom.has_east_door()
-        assert not myRoom.has_south_door()
-        assert not myRoom.has_west_door()
-
-    def testRoomHasTwoDoors(self):
-        myRoom = room.Room(room.EAST & room.NORTH)
+        myRoom = room.Room(room.EAST | room.NORTH)
+        print(bin(myRoom.doors))
         assert myRoom.has_north_door()
         assert myRoom.has_east_door()
         assert not myRoom.has_south_door()
