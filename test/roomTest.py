@@ -1,0 +1,112 @@
+import unittest
+from Server.sagServer import room
+
+
+class MapTest(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def testDefaultRoomHasAllDoors(self):
+        myRoom = room.Room()
+        assert myRoom.has_north_door()
+        assert myRoom.has_east_door()
+        assert myRoom.has_south_door()
+        assert myRoom.has_west_door()
+
+    def testRoomHasOnlyNorthDoor(self):
+        myRoom = room.Room(room.NORTH)
+        assert myRoom.has_north_door()
+        assert not myRoom.has_east_door()
+        assert not myRoom.has_south_door()
+        assert not myRoom.has_west_door()
+
+    def testRoomHasOnlyEastDoor(self):
+        myRoom = room.Room(room.EAST)
+        assert not myRoom.has_north_door()
+        assert myRoom.has_east_door()
+        assert not myRoom.has_south_door()
+        assert not myRoom.has_west_door()
+
+    def testRoomHasOnlySouthDoor(self):
+        myRoom = room.Room(room.EAST)
+        assert not myRoom.has_north_door()
+        assert not myRoom.has_east_door()
+        assert myRoom.has_south_door()
+        assert not myRoom.has_west_door()
+
+    def testRoomHasOnlyWestDoor(self):
+        myRoom = room.Room(room.EAST)
+        assert not myRoom.has_north_door()
+        assert not myRoom.has_east_door()
+        assert not myRoom.has_south_door()
+        assert myRoom.has_west_door()
+
+    def testRoomHasTwoDoors(self):
+        myRoom = room.Room(room.EAST & room.NORTH)
+        assert myRoom.has_north_door()
+        assert myRoom.has_east_door()
+        assert not myRoom.has_south_door()
+        assert not myRoom.has_west_door()
+
+    def testRoomHasTwoDoors(self):
+        myRoom = room.Room(room.EAST & room.NORTH)
+        assert myRoom.has_north_door()
+        assert myRoom.has_east_door()
+        assert not myRoom.has_south_door()
+        assert not myRoom.has_west_door()
+
+    def testRoomHasNoDoors(self):
+        myRoom = room.Room(room.NONE)
+        assert not myRoom.has_north_door()
+        assert not myRoom.has_east_door()
+        assert not myRoom.has_south_door()
+        assert not myRoom.has_west_door()
+
+    def testAddNorthDoor(self):
+        myRoom = room.Room(room.NONE)
+        myRoom.set_north_door(True)
+        assert myRoom.has_north_door()
+
+    def testAddEastDoor(self):
+        myRoom = room.Room(room.NONE)
+        myRoom.set_east_door(True)
+        assert myRoom.has_east_door()
+
+    def testAddSouthDoor(self):
+        myRoom = room.Room(room.NONE)
+        myRoom.set_south_door(True)
+        assert myRoom.has_south_door()
+
+    def testAddWestDoor(self):
+        myRoom = room.Room(room.NONE)
+        myRoom.set_west_door(True)
+        assert myRoom.has_west_door()
+
+
+    def testRemoveNorthDoor(self):
+        myRoom = room.Room()
+        myRoom.set_north_door(False)
+        assert not myRoom.has_north_door()
+
+    def testRemoveEastDoor(self):
+        myRoom = room.Room()
+        myRoom.set_east_door(False)
+        assert not myRoom.has_east_door()
+
+    def testRemoveSouthDoor(self):
+        myRoom = room.Room()
+        myRoom.set_south_door(False)
+        assert not myRoom.has_south_door()
+
+    def testRemoveWestDoor(self):
+        myRoom = room.Room()
+        myRoom.set_west_door(False)
+        assert not myRoom.has_west_door()
+
+
+if __name__ == "__main__":
+    unittest.main()
