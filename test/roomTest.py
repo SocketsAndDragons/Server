@@ -10,6 +10,30 @@ class MapTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def testDefaultInitPlayers(self):
+        room1 = room.Room()
+        assert room1.players == []
+
+    def testCustomInitPlayers(self):
+        room1 = room.Room(players=10)
+        assert room1.players == 10
+
+    def testDefaultInitInteractions(self):
+        room1 = room.Room()
+        assert room1.interactions == []
+
+    def testCustomInitPlayers(self):
+        room1 = room.Room(interactions=10)
+        assert room1.interactions == 10
+
+    def testDefaultInitMonsters(self):
+        room1 = room.Room()
+        assert room1.monsters == []
+
+    def testCustomInitMonsters(self):
+        room1 = room.Room(monsters=10)
+        assert room1.monsters == 10
+
     def testDefaultRoomHasAllDoors(self):
         myRoom = room.Room()
         assert myRoom.has_north_door()
