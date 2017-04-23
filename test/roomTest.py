@@ -1,3 +1,7 @@
+"""
+Author: Thomas Bonatti (thomasbonatti2695@gmail.com)
+"""
+
 import unittest
 from Server.sagServer import room
 
