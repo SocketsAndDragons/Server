@@ -2,8 +2,8 @@ import threading
 import time
 
 
-from Server.sagShell.shell import Shell
-from Server.sagShell.shell import HelpCommand
+from Server.shell.shell import Shell
+from Server.shell.shell import HelpCommand
 
 PORT = 2466
 HOST = '127.0.0.1'
