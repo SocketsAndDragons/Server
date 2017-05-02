@@ -3,7 +3,7 @@ Author: Thomas Bonatti (thomasbonatti2695@gmail.com)
 """
 
 import unittest
-from Server.sagServer import map
+from Server.server import map
 
 
 class MapTest(unittest.TestCase):
