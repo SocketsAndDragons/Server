@@ -62,3 +62,8 @@ def stream_parse(socket,queue):
 			else:
 				(json, pos, size_left) = peel_json(data, pos, size_left)
 				msg += json.decode("utf-8")
+
+def stream_send(socket,json):
+	data = json.encode("utf-8")
+	data = len(data).to_bytes(4, byteorder='big') + data
+	socket.send(data)

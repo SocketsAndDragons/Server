@@ -7,11 +7,14 @@ import dragon
 import threading
 import queue
 import time
+import uuid
 
 def accept_client(client):
 	thread = threading.Thread(target=dragon.stream_parse,name="Potato",args = [client,commands])
 	thread.start()
+	return (uuid.uuid4(),thread)
 
+threads = {}
 clients = {}
 
 parser = argparse.ArgumentParser(description='Video games.')
@@ -36,19 +39,13 @@ commands = queue.Queue()
 
 while True:
 	client, addr = sock.accept()
-	thread = threading.Thread(target=dragon.stream_parse,name="Potato",args = [client,commands])
-	thread.start()
-	client, addr = sock.accept()
-	thread = threading.Thread(target=dragon.stream_parse,name="Spinach",args = [client,commands])
-	thread.start()
-	client, addr = sock.accept()
-	thread = threading.Thread(target=dragon.stream_parse,name="Asbestos",args = [client,commands])
-	thread.start()
+	uuid, thread = accept_client(client)
+	threads[uuid] = thread
+	clients[uuid] = client
 
 	while True:
 		try:
 			item = commands.get(block=False)
 			print(item)
 		except queue.Empty:
-			print("NOTHING")
 			time.sleep(0.1)
