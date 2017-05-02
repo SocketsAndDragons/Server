@@ -3,8 +3,8 @@ Author: Thomas Bonatti (thomasbonatti2695@gmail.com)
 """
 
 import unittest
-from Server.sagServer.player import Player
-from Server.sagServer import room
+from Server.server.player import Player
+from Server.server import room
 
 
 class MapTest(unittest.TestCase):

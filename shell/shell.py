@@ -1,9 +1,9 @@
 
 import sys
-from Server.sagServer import map
-from Server.sagServer import room
-from Server.sagServer import playerCommands
-from Server.sagServer import gmCommands
+from Server.server import map
+from Server.server import room
+from Server.server import playerCmds
+from Server.server import gmCmds
 
 INSTANCE = None
 
