@@ -34,11 +34,6 @@ def stream_parse(socket,queue):
 	while True:
 		# Don't thrash my CPU so hard
 		time.sleep(0.001)
-		# We're out of data.
-		if pos >= packet_size:
-			data = prev_data + socket.recv(1024)
-			pos = 0
-			packet_size = len(data)
 
 		# A packet is done.
 		if size_left <= 0:
@@ -46,6 +41,13 @@ def stream_parse(socket,queue):
 			size = None
 			msg = ""
 			size_left = 1
+			
+		# We're out of data.
+		if pos >= packet_size:
+			data = prev_data + socket.recv(1024)
+			pos = 0
+			packet_size = len(data)
+
 
 		while pos < packet_size and size_left > 0:
 			# Start reading a new packet.
@@ -66,4 +68,5 @@ def stream_parse(socket,queue):
 def stream_send(socket,json):
 	data = json.encode("utf-8")
 	data = len(data).to_bytes(4, byteorder='big') + data
+	print(repr(data))
 	socket.send(data)
