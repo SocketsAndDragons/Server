@@ -23,6 +23,19 @@ class Map():
         y = int(strAddr[1:])-1
         return x, y
 
+    def address_of_room(self, room):
+        for i in range(len(self.rooms)):
+            for j in range(len(self.rooms[i])):
+                if self.rooms[i][j] is room:
+                    return i, j
+
     def getRoom(self, strAddr):
         x, y = self.getRoomAddr(strAddr)
         return self.rooms[x][y]
+
+    def findPlayerByName(self, playerName):
+        for i in range(len(self.rooms)):
+            for j in range(len(self.rooms[i])):
+                if self.rooms[i][j].containsPlayer(playerName):
+                    return i, j
+        return -1, -1

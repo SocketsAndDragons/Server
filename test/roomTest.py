@@ -6,6 +6,22 @@ import unittest
 from Server.sagServer import room
 
 
+class TestContainsPlayer(unittest.TestCase):
+
+    def setUp(self):
+        self.room = room.Room(entities=[MockPlayer("player1"), MockPlayer("player1")])
+
+    def testContainsPlayerTrue(self):
+        assert self.room.containsPlayer("player1")
+
+    def testCotainsPlayerFalse(self):
+        assert not self.room.containsPlayer("[pkjef[j")
+
+class MockPlayer:
+
+    def __init__(self, name):
+        self.name = name
+
 class MapTest(unittest.TestCase):
 
     def setUp(self):
