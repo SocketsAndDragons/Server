@@ -8,24 +8,13 @@ ALL_DOORS = 0b1111
 
 class Room:
 
-    def __init__(self, doors=ALL_DOORS, interactions=None, players=None, monsters=None):
+    def __init__(self, doors=ALL_DOORS, entities=None):
         self.doors = doors
 
-        if not interactions is None:
-            self.interactions = interactions
+        if not entities is None:
+            self.interactions = entities
         else:
             self.interactions = []
-
-        if not players is None:
-            self.player = players
-        else:
-            self.players = []
-
-        if not monsters is None:
-            self.monsters = monsters
-        else:
-            self.monsters = monsters
-
 
     def has_north_door(self):
         return bool(self.doors & NORTH)
@@ -57,3 +46,8 @@ class Room:
         else:
             self.doors &= (ALL_DOORS ^ door_set)
 
+    def containsPlayer(self, playerName):
+        for entity in self.entities:
+            if entity.name == playerName:
+                return True
+        return False
