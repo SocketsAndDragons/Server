@@ -6,4 +6,3 @@ test:
     - python test/roomTest.py
     - python test/serverTest.py
     - python test/playerCmdTest.py
-    
