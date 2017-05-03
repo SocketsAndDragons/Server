@@ -1,0 +1,7 @@
+
+test:
+  override:
+    - python test/mapTest.py
+    - python test/playerTest.py
+    - python test/roomTest.py
+    - python test/serverTest.py
