@@ -5,3 +5,4 @@ test:
     - python test/playerTest.py
     - python test/roomTest.py
     - python test/serverTest.py
+    - python test/playerCmdTest.py
