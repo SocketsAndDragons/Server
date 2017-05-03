@@ -6,6 +6,38 @@ import unittest
 from Server.server import map
 
 
+class TestMapParsing(unittest.TestCase):
+
+    def setUp(self):
+        self.map = map.Map(3,3)
+        self.map.rooms[1][0].entities.append(MochPlayer("player1"))
+        self.map.rooms[0][2].entities.append(MochPlayer("player2"))
+
+    def testAddressOfRoom(self):
+        x = 1
+        y = 2
+        room = self.map.rooms[x][y]
+        result_x, result_y = self.map.address_of_room(room)
+        self.assertEqual(result_x, x)
+        self.assertEqual(result_y, y)
+
+    def testFindPlayerOne(self):
+        x, y = self.map.findEntityByName("player1")
+        self.assertEqual(x, 1)
+        self.assertEqual(y, 0)
+
+    def testFindNoPlayer(self):
+        x, y = self.map.findEntityByName("odysseus")
+        self.assertEqual(x, -1)
+        self.assertEqual(y, -1)
+
+
+class MochPlayer:
+
+    def __init__(self, name):
+        self.name = name
+
+
 class MapTest(unittest.TestCase):
 
     def setUp(self):

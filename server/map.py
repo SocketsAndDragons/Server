@@ -33,9 +33,9 @@ class Map():
         x, y = self.getRoomAddr(strAddr)
         return self.rooms[x][y]
 
-    def findPlayerByName(self, playerName):
+    def findEntityByName(self, playerName):
         for i in range(len(self.rooms)):
             for j in range(len(self.rooms[i])):
-                if self.rooms[i][j].containsPlayer(playerName):
+                if self.rooms[i][j].containsEntity(playerName):
                     return i, j
         return -1, -1
