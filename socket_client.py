@@ -5,6 +5,9 @@ import socket
 import threading
 import queue
 import time
+import actions
+import events
+import json
 
 def game_loop(sock,inputs,resps):
 	while True:
@@ -13,16 +16,14 @@ def game_loop(sock,inputs,resps):
 			item = resps.get(block=False)
 			print(item)
 		except queue.Empty:
-			print("Nothing from the server")
-			time.sleep(1)
+			time.sleep(0.1)
 		# Handle inputs
 		try:
 			item = inputs.get(block=False)
 			print("Sending ",item)
-			dragon.stream_send(sock,item)
+			dragon.stream_send_dict(sock,item)
 		except queue.Empty:
-			print("No command to send!")
-			time.sleep(1)
+			time.sleep(0.1)
 
 
 s = socket.socket()
@@ -40,4 +41,5 @@ thread = threading.Thread(target=game_loop,name="Input",args = [s,inputs,resps])
 thread.start()
 while True:
 	cmd = input("Gimme something to do ===>>  ")
-	inputs.put(cmd)
+	act = actions.parse(cmd)
+	inputs.put(act)
