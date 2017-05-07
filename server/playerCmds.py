@@ -63,6 +63,7 @@ class MoveCommand:
         #todo send events
 
     def get_events(self, args):
+        return [{}]
 
 
 class SayCommand:
@@ -75,6 +76,7 @@ class SayCommand:
         return " ".join(args[2:])
 
     def get_events(self, args):
+        return [{}]
 
 
 class ShoutCommand:
@@ -97,5 +99,6 @@ class WhisperCommand:
         return " ".join(args[2:])
 
     def get_events(self, args):
+        return [{}]
 
 
