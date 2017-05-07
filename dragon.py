@@ -15,7 +15,7 @@ def peel_json(data,pos,size_left):
 		end = pos + size_left
 		return (data[pos:end], end, 0)
 
-def stream_parse(socket,queue):
+def stream_parse(socket,queue,format='dict'):
 	# Size of the next JSON unit
 	size = None
 	# Size of the data unit we're parsing
@@ -37,11 +37,14 @@ def stream_parse(socket,queue):
 
 		# A packet is done.
 		if size_left <= 0:
-			queue.put(msg)
+			if format == 'json':
+				queue.put(msg)
+			elif format == 'dict':
+				queue.put(json.loads(msg))
 			size = None
 			msg = ""
 			size_left = 1
-			
+
 		# We're out of data.
 		if pos >= packet_size:
 			data = prev_data + socket.recv(1024)
@@ -62,8 +65,11 @@ def stream_parse(socket,queue):
 					pos = packet_size
 			# We're reading a packet
 			else:
-				(json, pos, size_left) = peel_json(data, pos, size_left)
-				msg += json.decode("utf-8")
+				(new_json, pos, size_left) = peel_json(data, pos, size_left)
+				msg += new_json.decode("utf-8")
+
+def stream_send_dict(socket,dict):
+	stream_send(socket, json.dumps(dict))
 
 def stream_send(socket,json):
 	data = json.encode("utf-8")
