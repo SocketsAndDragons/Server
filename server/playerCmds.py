@@ -62,17 +62,7 @@ class MoveCommand:
         pass
         #todo send events
 
-    """
-    args[0] =
-    """
     def get_events(self, args):
-        return [
-            dict(name="look", peeking=True, room="string", entities=[
-                "name",
-            ], items=[
-                "name",
-            ])
-        ]
 
 
 class SayCommand:
@@ -85,11 +75,7 @@ class SayCommand:
         return " ".join(args[2:])
 
     def get_events(self, args):
-        return [
-            {
-                ""
-            }
-        ]
+
 
 class ShoutCommand:
 
@@ -109,5 +95,7 @@ class WhisperCommand:
 
     def get_message(self, args):
         return " ".join(args[2:])
+
+    def get_events(self, args):
 
 
