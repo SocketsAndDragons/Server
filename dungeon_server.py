@@ -8,7 +8,7 @@ import queue
 import time
 import uuid
 
-from Server.server import dungeonMap
+from Server.server import dungeon_map
 from Server import dragon
 
 
@@ -32,7 +32,7 @@ class DungeonServer:
             self.clients = {}
             self.cmds_received = queue.Queue()
 
-            self.map = dungeonMap.Map(width, height)
+            self.map = dungeon_map.Map(width, height)
             self.players = []
             self.monsters = []
             self.cmds = {}

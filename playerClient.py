@@ -1,4 +1,4 @@
-from Server import dragon
+import dragon
 import socket
 import threading
 import queue
@@ -37,7 +37,7 @@ thread = threading.Thread(target=game_loop,name="Input",args = [s,inputs,resps])
 thread.start()
 while True:
 	cmd = input("Gimme something to do ===>>  ")
-	act = actions.parse(cmd)
+	act = cmd.split()
 	inputs.put(act)
 
 
