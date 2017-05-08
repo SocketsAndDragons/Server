@@ -1,9 +1,6 @@
-
 import sys
-from Server.server import map
-from Server.server import room
-from Server.server import playerCmds
-from Server.server import gmCmds
+
+from Server.server import dungeonMap
 
 INSTANCE = None
 
@@ -14,7 +11,7 @@ class Shell:
 
         def __init__(self, width=10, height=10, startingActions=0):
 
-            self.map = map.Map(width, height)
+            self.map = dungeonMap.Map(width, height)
             self.players = []
             self.monsters = []
             self.gmCmd = {}
@@ -25,24 +22,37 @@ class Shell:
             self.display()
             while True:
                 gmIn = input()
+                if gmIn.strip() == '':
+                    self.display()
+                    continue
+
                 if gmIn == 'quit' or gmIn == 'exit':
                     gmIn = input('are you sure you would like to exit? (y/N)')
                     if gmIn.startswith('y'):
                         break
 
                 args = gmIn.split()
-                self.execute(args[0], args)
+                self.execute(args[0], args, "Shell")
 
-        def execute(self, cmdName, args):
+        def execute(self, cmdName, args, src):
             try:
                 if cmdName in self.gmCmd:
                     cmd = self.gmCmd[cmdName]
-                    success = cmd.execute(args)
+                    cmd_args = cmd.execute(args, src)
+                    events = cmd.get_events(cmd_args)
+                    for event in events:
+                        self.send_event(event)
+
                 else:
                     self.display("command not recognized")
             except Exception as e:
                 self.display("an error occurred executing the command", cmdName,"with the arguments", args)
                 raise e
+
+        def send_event(self, event):
+            self.display("TODO: send event", lastMsg=False)
+            self.display(event)
+            pass
 
         def display(self, *args, lastMsg=True, debug=False):
             # do not print debug messages outside debugt mode
@@ -70,7 +80,7 @@ class HelpCommand:
     def __init__(self):
         self.short_help_msg = "this command prints all availible GM commands"
 
-    def execute(self, args):
+    def execute(self, args, src):
         if len(args) == 1:
             self.list_all_cmds()
 
@@ -98,3 +108,6 @@ class HelpCommand:
             msg += '\n'
 
         Shell().display(msg)
+
+    def get_events(self, args):
+        return []

@@ -2,7 +2,7 @@
 import unittest
 from Server.server.playerCmds import MoveCommand
 from Server.server.playerCmds import SayCommand
-from Server.server.map import Map
+from Server.server.dungeonMap import Map
 from Server.server import room
 
 
@@ -73,7 +73,10 @@ class MoveCommandTest(unittest.TestCase):
 class SayCommandTest(unittest.TestCase):
 
     def setUp(self):
-        self.cmd = SayCommand()
+        self.map = Map(4, 4)
+        self.player = PlayerMock("player1")
+        self.map.rooms[1][1].entities.append(self.player)
+        self.cmd = SayCommand(self.map)
 
     def testMessage(self):
         args = ['say', 'player1', 'spam', 'and', 'eggs']
