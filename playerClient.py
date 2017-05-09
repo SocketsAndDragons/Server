@@ -1,9 +1,12 @@
+import sys
 import dragon
 import socket
 import threading
 import queue
 import time
 import json
+
+THREADS = []
 
 def game_loop(sock,inputs,resps):
 	while True:
@@ -21,23 +24,34 @@ def game_loop(sock,inputs,resps):
 		except queue.Empty:
 			time.sleep(0.1)
 
+try:
+	s = socket.socket()
 
-s = socket.socket()
+	s.connect(('localhost',8080))
 
-s.connect(('localhost',8080))
+	print("YAYAYY")
 
-print("YAYAYY")
+	inputs = queue.Queue()
+	resps = queue.Queue()
 
-inputs = queue.Queue()
-resps = queue.Queue()
+	thread = threading.Thread(target=dragon.stream_parse,name="Listener",args = [s,resps])
+	thread.start()
+	THREADS.append(thread)
 
-thread = threading.Thread(target=dragon.stream_parse,name="Listener",args = [s,resps])
-thread.start()
-thread = threading.Thread(target=game_loop,name="Input",args = [s,inputs,resps])
-thread.start()
-while True:
-	cmd = input("Gimme something to do ===>>  ")
-	act = cmd.split()
-	inputs.put(act)
+	thread = threading.Thread(target=game_loop,name="Input",args = [s,inputs,resps])
+	thread.start()
+	THREADS.append(thread)
+
+	while True:
+		cmd = input("Gimme something to do ===>>  ")
+		if cmd.startswith('..'):
+			sys.exit(0)
+
+		act = cmd.split()
+		inputs.put(act)
+
+finally:
+	sys.exit(1)
+
 
 

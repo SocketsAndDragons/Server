@@ -1,8 +1,7 @@
 import sys
 
-from Server.server import dungeonMap
+from Server.server import dungeon_map
 
-INSTANCE = None
 
 class Shell:
     class __Shell:
@@ -11,7 +10,7 @@ class Shell:
 
         def __init__(self, width=10, height=10, startingActions=0):
 
-            self.map = dungeonMap.Map(width, height)
+            self.map = dungeon_map.Map(width, height)
             self.players = []
             self.monsters = []
             self.gmCmd = {}
@@ -47,7 +46,7 @@ class Shell:
                     self.display("command not recognized")
             except Exception as e:
                 self.display("an error occurred executing the command", cmdName,"with the arguments", args)
-                raise e
+                if Shell.DEBUG: raise e
 
         def send_event(self, event):
             self.display("TODO: send event", lastMsg=False)
