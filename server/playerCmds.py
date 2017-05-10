@@ -1,5 +1,5 @@
-from Server.server import room
-from Server.shell import shell
+from server import room
+from shell import shell
 
 def encode_direction(direction):
     dir = direction.lower()
@@ -101,6 +101,27 @@ class MoveCommand:
             "message": "you moved to the " + move_direction
         }]
 
+class PingCommand:
+
+    def __init__(self, map):
+        self.map = map
+        self.short_help_msg = "is the server alive?"
+
+    def help(self):
+        shell.Shell().display(self.short_help_msg)
+
+    def execute(self, args, src):
+        player_name = src
+        message = "Pong!"
+
+        return [{
+			"name": "pong",
+			"message": "Pong!",
+			"dest": {
+				"type": "uuid",
+				"value": src
+			}
+		}]
 
 class SayCommand:
 
@@ -172,5 +193,3 @@ class WhisperCommand:
 
     def get_events(self, args):
         return [{}]
-
-

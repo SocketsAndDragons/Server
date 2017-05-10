@@ -1,6 +1,6 @@
 import sys
 
-from Server.server import dungeon_map
+from server import dungeon_map
 
 
 class Shell:

@@ -8,9 +8,9 @@ import queue
 import time
 import uuid
 
-from Server.server import dungeon_map
-from Server.server import player
-from Server import dragon
+from server import dungeon_map
+from server import player
+import dragon
 
 
 class Server:
@@ -41,9 +41,10 @@ class Server:
             self.monsters = []
 
         def accept_new_client(self, client):
-            thread = threading.Thread(target=dragon.stream_parse, name="Potato", args=[client, self.cmds_received])
+            id = str(uuid.uuid4())
+            thread = threading.Thread(target=dragon.stream_parse, name="Potato", args=[client, self.cmds_received, id])
             thread.start()
-            return (uuid.uuid4(), thread)
+            return (id, thread)
 
         def run(self):
             while True:
@@ -61,10 +62,14 @@ class Server:
                     try:
                         item = self.cmds_received.get(block=False)
                         print(item)
-                        cmd_name = item[0]
-                        self.execute(cmd_name, item, "somebody")
+                        # (id, action)
+                        cmd_sender = item[0]
+                        cmd_name = item[1][0]
+                        print(cmd_sender, " did something")
+                        self.execute(cmd_name, item[1][1:], cmd_sender)
                     except queue.Empty:
-                        time.sleep(0.1)
+                        time.sleep(1)
+                        print("No input")
 
         def register_new_player(self, sock, name=None):
             print("registering new player")
@@ -81,6 +86,7 @@ class Server:
             reply["name"] = name
             reply["number"] = player_number
             reply["type"] = "player"
+            reply["message"] = "connected successfully"
             return reply
 
         def start_socket(self):
@@ -112,8 +118,7 @@ class Server:
             try:
                 if cmd_name in self.cmds:
                     cmd = self.cmds[cmd_name]
-                    cmd_args = cmd.execute(args, src)
-                    events = cmd.get_events(cmd_args)
+                    events = cmd.execute(args, src)
                     for event in events:
                         self.send_event(event)
 
@@ -125,15 +130,19 @@ class Server:
 
         def send_event(self, event):
             print('sending event:', event)
-            # dragon.stream_send_dict(self.sock, event)
+
+            targets = []
+
+            if event["dest"]["type"] == "uuid":
+                targets.append(event["dest"]["value"])
+            else:
+                print("I have no idea what that destination is")
+
+            for target in targets:
+                dragon.stream_send_dict(self.clients[target], event)
 
 
 if __name__ == "__main__":
     server = Server()
     server.start_socket()
     server.run()
-
-
-
-
-

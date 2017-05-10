@@ -1,5 +1,19 @@
 import json
 
+# Meta
+def joined(success):
+	event = {}
+	event["name"] = "joined"
+	event["success"] = success
+	return event
+
+def goodbye():
+	event = {}
+	event["name"] = "goodbye"
+	return event
+
+
+# Gameplay
 def moved(success):
 	event = {}
 	event["name"] = "moved"

@@ -1,4 +1,4 @@
-from Server.sagServer.shell import Shell
+from shell import Shell
 
 
 class Equipment:

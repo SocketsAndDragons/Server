@@ -1,4 +1,4 @@
-from Server.server import room
+from server import room
 
 ORD_OFFSET = 97
 

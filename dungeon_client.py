@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import sys
 import dragon
 import socket
@@ -13,7 +15,8 @@ def game_loop(sock,inputs,resps):
 		# Handle server messages
 		try:
 			item = resps.get(block=False)
-			print(item)
+			print("Received: ")
+			print(item[1]["message"])
 		except queue.Empty:
 			time.sleep(0.1)
 		# Handle inputs
@@ -52,6 +55,3 @@ try:
 
 finally:
 	sys.exit(1)
-
-
-

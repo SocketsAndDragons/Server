@@ -1,4 +1,23 @@
-## Cool Actions
+## Meta
+
+### Join
+
+```
+{
+	name: join
+	player: string
+}
+```
+
+### Quit
+
+```
+{
+	name: quit
+}
+```
+
+## Gameplay
 
 ### Move
 

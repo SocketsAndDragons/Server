@@ -48,15 +48,12 @@ def stream_parse(socket,queue,tag=None,format='dict'):
 
 		# We're out of data.
 		if pos >= packet_size:
-			print("Waiting for data")
 			data = prev_data + socket.recv(1024)
 			pos = 0
 			packet_size = len(data)
-			print("Data received: ",data)
 
 
 		while pos < packet_size and size_left > 0:
-			print(pos,size_left,packet_size)
 			# Start reading a new packet.
 			if not size:
 				# We have enough data to peel off the size

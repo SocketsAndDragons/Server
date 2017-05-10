@@ -1,4 +1,21 @@
-## Events
+## Meta
+
+### Joined
+```
+{
+	name: joined
+	success: true/false
+}
+```
+
+### Goodbye
+```
+{
+	name: goodbye
+}
+```
+
+## Gameplay
 
 ### Moved
 ```

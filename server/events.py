@@ -1,4 +1,4 @@
-from Server.shell import Shell
+from shell import Shell
 
 
 class EventPublishExceptions(Exception):
@@ -18,4 +18,3 @@ class Event:
     def publish(self):
         if self.dest.startswith("room"):
             Shell().display("send to a while room")
-

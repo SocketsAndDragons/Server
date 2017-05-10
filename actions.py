@@ -1,5 +1,11 @@
 import json
 
+class InvalidCommandException(Exception):
+	pass
+
+class InvalidArgumentException(Exception):
+	pass
+
 def parse(input):
 	cmd = input.split(" ")[0]
 	if cmd == "look":
@@ -11,6 +17,20 @@ def parse(input):
 	else:
 		raise Exception
 
+# Meta
+
+def join(player):
+	action = {}
+	action["name"] = "join"
+	action["player"] = player
+	return action
+
+def quit():
+	action = {}
+	action["name"] = "quit"
+	return action
+
+# Gameplay
 def look():
 	action = {}
 	action["name"] = "look"
@@ -28,3 +48,6 @@ def whisper(target, text):
 	action["text"] = text
 	action["target"] = target
 	return action
+
+def quit():
+	action = {}
