@@ -40,6 +40,8 @@ class Server:
             self.cmds = {}
             self.monsters = []
 
+            self.dest_rules = {}
+
         def accept_new_client(self, client):
             id = str(uuid.uuid4())
             thread = threading.Thread(target=dragon.stream_parse, name="Potato", args=[client, self.cmds_received, id])
@@ -133,13 +135,14 @@ class Server:
 
         def send_event(self, event):
             print('sending event:', event)
+            rule_name = event["dest"]["type"]
+            rule = self.dest_rules[rule_name]
+            targets = rule.get_targets(event["dest"])
 
-            targets = []
-
-            if event["dest"]["type"] == "uuid":
-                targets.append(event["dest"]["value"])
-            else:
-                print("I have no idea what that destination is")
+            # if event["dest"]["type"] == "uuid":
+            #     targets.append(event["dest"]["value"])
+            # else:
+            #     print("I have no idea what that destination is")
 
             for target in targets:
                 dragon.stream_send_dict(self.clients[target], event)
