@@ -1,4 +1,5 @@
 from Server.server import room
+from Server.shell import shell
 
 def encode_direction(direction):
     dir = direction.lower()
@@ -18,6 +19,10 @@ class MoveCommand:
 
     def __init__(self, map):
         self.map = map
+        self.short_help_msg = "Move to the room in the indicated direction."
+
+    def help(self):
+        shell.Shell().display(self.short_help_msg)
 
     def execute(self, args):
         playerName = args[1]
@@ -62,22 +67,88 @@ class MoveCommand:
         pass
         #todo send events
 
+    def get_events(self, args):
+        success = args[0]
+        player_name = args[1]
+        room_entered = args[2]
+        room_exited = args[3]
+        move_direction = args[4]
+
+
+        return [{
+            "src": player_name,
+            "name": "move",
+            "destination": "room" + room_entered,
+            "message": "player " + player_name + " entered the room."
+        },
+        {
+            "src": player_name,
+            "name": "move",
+            "destination": "room" + room_exited,
+            "message": "player " + player_name + " left the room."
+        },
+        {
+            "src": player_name,
+            "name": "move",
+            "destination": "gm",
+            "message": "player " + player_name + " moved from room " + room_exited + " to " + room_entered + "."
+        },
+        {
+            "src": player_name,
+            "name": "move",
+            "destination": "player "+player_name,
+            "success": success,
+            "message": "you moved to the " + move_direction
+        }]
+
 
 class SayCommand:
 
-    def execute(self, args):
-        playerName = args[1]
-        message = args[1] + " says: \"" + self.get_message(args) + "\""
+    def __init__(self, map):
+        self.map = map
+        self.short_help_msg = "say something to other players in the same room. This does not cost an action."
+
+    def help(self):
+        shell.Shell().display(self.short_help_msg)
+
+    def execute(self, args, src):
+        player_name = src
+        message = player_name + " says \"" + self.get_message(args) + "\""
+
+        current_room = 'a1'
+        cmd_args = [player_name, current_room, message]
+        return cmd_args
 
     def get_message(self, args):
-        return " ".join(args[2:])
+        return " ".join(args[1:])
+
+    def get_events(self, args):
+        player_name = args[0]
+        room = args[1]
+        message = args[2]
+        return [{
+            "src player": player_name,
+            "name": "say",
+            "destination": "room " + room,
+            "message": message
+        }]
 
 
 class ShoutCommand:
 
+    def __init__(self, map):
+        self.map = map
+        self.short_help_msg = "Use an action to say something to players in the same or adjacent rooms."
+
+    def help(self):
+        shell.Shell().display(self.short_help_msg)
+
     def execute(self, args):
         playerName = args[1]
         message = args[1] + " is shouting: \"" + self.get_message(args) + "\""
+
+    def get_events(self, args):
+        return [{}]
 
     def get_message(self, args):
         return " ".join(args[2:])
@@ -85,11 +156,21 @@ class ShoutCommand:
 
 class WhisperCommand:
 
+    def __init__(self, map):
+        self.map = map
+        self.short_help_msg = "TODO help for this method."
+
+    def help(self):
+        shell.Shell().display(self.short_help_msg)
+
     def execute(self, args):
         playerName = args[1]
         message = args[1] + " whispered to you: \"" + self.get_message(args) + "\""
 
     def get_message(self, args):
         return " ".join(args[2:])
+
+    def get_events(self, args):
+        return [{}]
 
 
