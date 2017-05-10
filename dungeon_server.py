@@ -46,7 +46,7 @@ class Server:
             thread.start()
             return (id, thread)
 
-        def run(self):
+        def listen(self):
             while True:
                 client, addr = self.sock.accept()
                 print()
@@ -58,18 +58,21 @@ class Server:
                 ack = self.register_new_player(client)
                 dragon.stream_send_dict(client, ack)
 
-                while True:
-                    try:
-                        item = self.cmds_received.get(block=False)
-                        print(item)
-                        # (id, action)
-                        cmd_sender = item[0]
-                        cmd_name = item[1][0]
-                        print(cmd_sender, " did something")
-                        self.execute(cmd_name, item[1][1:], cmd_sender)
-                    except queue.Empty:
-                        time.sleep(1)
-                        print("No input")
+        def run(self):
+            thread = threading.Thread(target=self.listen, name="Listening Thread", args=[])
+            thread.start()
+            while True:
+                try:
+                    item = self.cmds_received.get(block=False)
+                    print(item)
+                    # (id, action)
+                    cmd_sender = item[0]
+                    cmd_name = item[1][0]
+                    print(cmd_sender, " did something")
+                    self.execute(cmd_name, item[1][1:], cmd_sender)
+                except queue.Empty:
+                    time.sleep(1)
+                    print("No input")
 
         def register_new_player(self, sock, name=None):
             print("registering new player")
