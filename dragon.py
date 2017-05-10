@@ -34,38 +34,44 @@ def stream_parse(socket,queue,tag=None,format='dict'):
 	# Don't thrash my CPU so hard
 	time.sleep(0.001)
 
-	# A packet is done.
-	if size_left <= 0:
-		if format == 'json':
-			queue.put((tag,msg))
-		elif format == 'dict':
-			queue.put((tag,json.loads(msg)))
-		size = None
-		msg = ""
-		size_left = 1
+	while True:
+		# A packet is done.
+		if size_left <= 0:
+			print("Packet done: ",msg)
+			if format == 'json':
+				queue.put((tag,msg))
+			elif format == 'dict':
+				queue.put((tag,json.loads(msg)))
+			size = None
+			msg = ""
+			size_left = 1
 
-	# We're out of data.
-	if pos >= packet_size:
-		data = prev_data + socket.recv(1024)
-		pos = 0
-		packet_size = len(data)
+		# We're out of data.
+		if pos >= packet_size:
+			print("Waiting for data")
+			data = prev_data + socket.recv(1024)
+			pos = 0
+			packet_size = len(data)
+			print("Data received: ",data)
 
 
-	while pos < packet_size and size_left > 0:
-		# Start reading a new packet.
-		if not size:
-			# We have enough data to peel off the size
-			if pos + 4 <= packet_size:
-				(size,pos) = peel_size(data,pos)
-				size_left = size
-			# Not enough bytes. Keep these bytes, and request more data
+		while pos < packet_size and size_left > 0:
+			print(pos,size_left,packet_size)
+			# Start reading a new packet.
+			if not size:
+				# We have enough data to peel off the size
+				if pos + 4 <= packet_size:
+					(size,pos) = peel_size(data,pos)
+					size_left = size
+				# Not enough bytes. Keep these bytes, and request more data
+				else:
+					prev_data = data[pos:packet_size]
+					pos = packet_size
+			# We're reading a packet
 			else:
-				prev_data = data[pos:packet_size]
-				pos = packet_size
-		# We're reading a packet
-		else:
-			(new_json, pos, size_left) = peel_json(data, pos, size_left)
-			msg += new_json.decode("utf-8")
+				(new_json, pos, size_left) = peel_json(data, pos, size_left)
+				msg += new_json.decode("utf-8")
+				print(pos,size_left,packet_size)
 
 def stream_send_dict(socket,dict):
 	stream_send(socket, json.dumps(dict))
@@ -73,5 +79,6 @@ def stream_send_dict(socket,dict):
 def stream_send(socket,json):
 	data = json.encode("utf-8")
 	data = len(data).to_bytes(4, byteorder='big') + data
+	print("Sending packet: ")
 	print(repr(data))
 	socket.send(data)
