@@ -97,7 +97,7 @@ class Server:
                 return False
 
             parser = argparse.ArgumentParser(description='Video games.')
-            parser.add_argument('-o', '--hostname', type=str, help='hostname to bind to (defualt: localhost)', default='localhost')
+            parser.add_argument('-o', '--hostname', type=str, help='hostname to bind to (defualt: localhost)', default='0.0.0.0')
             parser.add_argument('-p', '--port', metavar='-p', type=int, help='port to listen on', default=8080)
 
             args = parser.parse_args()
