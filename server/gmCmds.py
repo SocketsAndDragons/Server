@@ -66,7 +66,7 @@ class SampleMapRule:
         return "\n".join(lines)
 
     def parse_line(self):
-
+        pass
 
 class MockMap:
 
