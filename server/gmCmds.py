@@ -1,4 +1,4 @@
-
+import server.player
 
 class MapCommand:
 
@@ -8,17 +8,24 @@ class MapCommand:
             self.map_rules = map_rules
         else:
             self.map_rules = []
-            self.map_rules.append(RoomNumberRule())
+            self.map_rules.append(NumberOfPlayersRule(map))
 
     def execute(self, args, src):
-        print("DEBUG: executing map command")
         msg = self.build_map()
         parser = MapStringParser(msg)
         for rule in self.map_rules:
             parser.parse_with_rule(rule)
 
-        print(parser.get_map_str())
-        return []
+        msg = parser.get_map_str()
+        return [{
+            "message": msg,
+            "width": self.map.width(),
+            "height": self.map.height(),
+            "dest": {
+                "type": "uuid",
+                "value": src
+            }
+        }]
 
     def build_map(self):
         msg, num_cols = self.get_map_header()
@@ -90,11 +97,12 @@ class MapStringParser:
         new_lines.append(rule.header_info(self.lines[0], self.n_rooms))
         new_lines.append(rule.header_border(self.lines[1], self.n_rooms))
         for i in range(5, len(self.lines), 4):
-            new_lines[i-4] = rule.room_top_border(self.lines[i-4], i, self.n_rooms)
-            new_lines.append(rule.room_top(self.lines[i-3],  i, self.n_rooms))
-            new_lines.append(rule.room_middle(self.lines[i-2],  i, self.n_rooms))
-            new_lines.append(rule.room_bottom(self.lines[i-1],  i, self.n_rooms))
-            new_lines.append(rule.room_bottom_border(self.lines[i],  i, self.n_rooms))
+            index = int((i-5)/4)
+            new_lines[i-4] = rule.room_top_border(self.lines[i-4], index, self.n_rooms)
+            new_lines.append(rule.room_top(self.lines[i-3], index, self.n_rooms))
+            new_lines.append(rule.room_middle(self.lines[i-2], index, self.n_rooms))
+            new_lines.append(rule.room_bottom(self.lines[i-1], index, self.n_rooms))
+            new_lines.append(rule.room_bottom_border(self.lines[i], index, self.n_rooms))
         self.lines = new_lines
 
     def get_map_str(self):
@@ -136,6 +144,25 @@ class RoomNumberRule(ParserRuleTemplate):
             split_index = offset + (j * 6) + 2
             letter = chr(j+65)
             line = line[:split_index - 1] + letter + str(int(index / 4) + 1) + line[split_index + 1:]
+
+        return line
+
+
+class NumberOfPlayersRule(ParserRuleTemplate):
+
+    def __init__(self, map):
+        self.map = map
+
+    def room_middle(self, line, index, n_rooms):
+        offset = 3
+        for j in range(n_rooms):
+            room = self.map.rooms[index][j] # [j]
+            split_index = offset + (j * 6) + 2
+            num_players = 0
+            for entity in room.entities:
+                if type(entity) == player.Player:
+                    num_players += 1
+            line = line[:split_index] + str(num_players) + line[split_index + 1:]
 
         return line
 

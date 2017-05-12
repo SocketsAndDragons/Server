@@ -19,6 +19,15 @@ class Map():
 
         return rooms
 
+    def height(self):
+        return len(self.rooms)
+
+    def width(self):
+        return len(self.rooms[0])
+
+    def get_room(self, x, y):
+        return self.rooms[y][x]
+
     def getRoomAddr(self, strAddr):
         letter = strAddr[0].lower()
         x = ord(letter) - ORD_OFFSET
