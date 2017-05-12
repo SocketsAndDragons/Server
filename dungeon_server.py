@@ -17,7 +17,7 @@ class Server:
 
     instance = None
 
-    def __init__(self, width=10, height=10):
+    def __init__(self, width=10, height=5):
         if Server.instance is None:
             Server.instance = Server.__DungeonServer(width, height)
 
@@ -26,7 +26,7 @@ class Server:
 
     class __DungeonServer:
 
-        def __init__(self, width=10, height=10):
+        def __init__(self, width, height):
 
             self.next_new_player_number = 1
             self.sock = None
@@ -72,7 +72,6 @@ class Server:
                     self.execute(cmd_name, item[1][1:], cmd_sender)
                 except queue.Empty:
                     time.sleep(1)
-                    print("No input")
 
         def register_new_player(self, sock, name=None):
             print("registering new player")

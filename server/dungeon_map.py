@@ -9,9 +9,11 @@ class Map():
 
     def __initRooms__(self, width, height):
         rooms = []
-        for i in range(width):
+        print("width:", width)
+        print("height:", height)
+        for i in range(height):
             row = []
-            for j in range(height):
+            for j in range(width):
                 row.append(room.Room())
             rooms.append(row)
 
