@@ -35,18 +35,41 @@ class MoveCommand:
         dir_code = encode_direction(direction)
 
         if not room.direction_is_cardinal(dir_code):
-            self.send_fail_events()
-            raise Exception("trying to move in non-cardinal direction\n\tTODO define/select exception type!")
+            return self.get_fail_events("you can only move in a cardinal direction (north, south, east or west)")
         if not old_room.has_doors(dir_code):
-            self.send_fail_events()
-            raise Exception("trying to move through non-existent door\n\tTODO define/select exception type!")
+            return self.get_fail_events("there is no door in that direction!")
 
-        new_room = self.get_new_room(x, y, dir_code)
+        old_addr = (x, y)
+        x, y = self.get_new_room_addr(x, y, dir_code)
+        new_room = self.map.rooms[y][x]
         success = self.do_move(old_room, new_room, src)
-        self.send_success_events()
-        return []
 
-    def get_new_room(self, x, y, direction):
+        return self.get_events(src, direction, old_addr, (x,y))
+
+    def get_events(self, uuid, move_direction, room_entered, room_exited):
+        player_name = dungeon_server.Server().players[uuid].name
+
+        return [{
+            "src": player_name,
+            "name": "move",
+            "dest": {"type": "room", "x": room_entered[0], "y": room_entered[1]},
+            "message": player_name + " left the room."
+        },
+        {
+            "src": player_name,
+            "name": "move",
+            "dest": {"type": "room", "x": room_exited[0], "y": room_exited[1]},
+            "message": "player " + player_name + " entered the room."
+        },
+        {
+            "src": player_name,
+            "name": "move",
+            "dest": {"type": "uuid", "value": uuid},
+            "success": True,
+            "message": "you moved to the " + move_direction
+        }]
+
+    def get_new_room_addr(self, x, y, direction):
         if direction == room.NORTH:
             y -= 1
         elif direction == room.EAST:
@@ -56,7 +79,7 @@ class MoveCommand:
         elif direction == room.WEST:
             x -= 1
         print('new_room -- (x:', x, 'y:', y, ')')
-        return self.map.rooms[y][x]
+        return (x, y)
 
     def do_move(self, old_room, new_room, uuid):
         player = None
@@ -64,56 +87,13 @@ class MoveCommand:
         player = dungeon_server.Server().players[uuid]
         new_room.entities.append(player)
         old_room.entities.remove(player)
-        # except:
-        #     if player is not None:
-        #         new_room.entities.remove(player)
-        #         old_room.entities.remove(player)
-        #         old_room.entities.append(player)
-        #     return False
 
         return True
 
-    def send_success_events(self):
+    def get_fail_events(self):
         pass
         #todo send events
 
-    def send_fail_events(self):
-        pass
-        #todo send events
-
-    def get_events(self, args, src):
-        success = args[0]
-        player_name = args[1]
-        room_entered = args[2]
-        room_exited = args[3]
-        move_direction = args[4]
-
-
-        return [{
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "room", "value": room_entered},
-            "message": "player " + player_name + " entered the room."
-        },
-        {
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "room", "value": room_exited},
-            "message": "player " + player_name + " left the room."
-        },
-        # {
-        #     "src": player_name,
-        #     "name": "move",
-        #    "dest": {"type": "uuid", "value": src},
-        #     "message": "player " + player_name + " moved from room " + room_exited + " to " + room_entered + "."
-        # },
-        {
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "uuid", "value": src},
-            "success": success,
-            "message": "you moved to the " + move_direction
-        }]
 
 class PingCommand:
 

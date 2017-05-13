@@ -10,10 +10,11 @@ STARTING_SPD = 5
 
 class Player:
 
-    def __init__(self, number, name):
+    def __init__(self, number, name, uuid):
 
         self.number = number
         self.name = name
+        self.uuid = uuid
 
         self.weapon = None
         self.armorEquiped = None

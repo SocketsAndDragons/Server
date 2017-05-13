@@ -11,6 +11,11 @@ def getRoomAddr(self, strAddr):
     return x, y
 
 
+def get_addr_name(self, x, y):
+    letter = ord(x + ORD_OFFSET)
+    return letter + str(y)
+
+
 class Map():
 
     def __init__(self, width, height):

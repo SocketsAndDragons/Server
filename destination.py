@@ -12,11 +12,26 @@ class UuidDestRule:
         return [dest_obj['value']]
 
 
-class RoomDestRule:
+class RoomNameDestRule:
 
     def get_targets(self, dest_obj):
         room_str = dest_obj['value']
         x, y = dungeon_map.getRoomAddr(room_str)
+        map = dungeon_server.Server().map
+        room = map.get_room(x, y)
+
+        targets = []
+        for entity in room.entities:
+            if type(entity) == player.Player:
+                targets.append(entity.uuid)
+        return targets
+
+
+class RoomDestRule:
+
+    def get_targets(self, dest_obj):
+        x = dest_obj['x']
+        y = dest_obj['y']
         map = dungeon_server.Server().map
         room = map.get_room(x, y)
 
@@ -41,7 +56,6 @@ class AllDestRule:
         targets = []
         for uuid in server.players:
             targets.append(uuid)
-        # TODO implement this
         return targets
 
 
