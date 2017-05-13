@@ -50,6 +50,7 @@ def verboseify_direction_string(dirStr):
 
 
 def encode_direction(direction):
+    """ takes a string and turns it into a direction code """
     dir = expand_direction_string(direction)
     code = 0
     if "north" in dir:

@@ -1,6 +1,8 @@
 #!/usr/bin/python3.6
 
 import dungeon_server
+from server import dungeon_map
+from server import player
 
 # THIS IS NOT TESTED
 
@@ -13,9 +15,16 @@ class UuidDestRule:
 class RoomDestRule:
 
     def get_targets(self, dest_obj):
+        room_str = dest_obj['value']
+        x, y = dungeon_map.getRoomAddr(room_str)
         map = dungeon_server.Server().map
-        # TODO implement this
-        return []
+        room = map.get_room(x, y)
+
+        targets = []
+        for entity in room.entities:
+            if type(entity) == player.Player:
+                targets.append(entity.uuid)
+        return targets
 
 
 class GmDestRule:
