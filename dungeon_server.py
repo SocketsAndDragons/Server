@@ -17,7 +17,7 @@ class Server:
 
     instance = None
 
-    def __init__(self, width=10, height=10):
+    def __init__(self, width=10, height=5):
         if Server.instance is None:
             Server.instance = Server.__DungeonServer(width, height)
 
@@ -26,7 +26,7 @@ class Server:
 
     class __DungeonServer:
 
-        def __init__(self, width=10, height=10):
+        def __init__(self, width, height):
 
             self.next_new_player_number = 1
             self.sock = None
@@ -55,7 +55,7 @@ class Server:
                 self.threads[uuid] = thread
                 self.clients[uuid] = client
 
-                ack = self.register_new_player(client)
+                ack = self.register_new_player(uuid)
                 dragon.stream_send_dict(client, ack)
 
         def run(self):
@@ -64,26 +64,29 @@ class Server:
             while True:
                 try:
                     item = self.cmds_received.get(block=False)
+                    print('item:')
                     print(item)
                     # (id, action)
                     cmd_sender = item[0]
-                    cmd_name = item[1][0]
+                    cmd = item[1]
+                    cmd_name = cmd[0]
                     print(cmd_sender, " did something")
-                    self.execute(cmd_name, item[1][1:], cmd_sender)
+                    self.execute(cmd_name, cmd, cmd_sender)
                 except queue.Empty:
                     time.sleep(1)
-                    print("No input")
 
-        def register_new_player(self, sock, name=None):
+        def register_new_player(self, uuid, name=None):
             print("registering new player")
             player_number = self.next_new_player_number
             self.next_new_player_number += 1
             if name is None:
                 name = 'player' + str(player_number)
-            self.players[name] = player.Player(player_number, name)
-            self.connections[name] = sock
+            self.players[uuid] = player.Player(player_number, name)
+            print(type(self.players[uuid]))
+            print(self.players[uuid].name, "added to the game")
+            self.map.add_new_player(self.players[uuid])
 
-            reply = {}
+            reply = dict()
             reply["event"] = "connect"
             reply["success"] = True
             reply["name"] = name

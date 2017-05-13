@@ -1,5 +1,7 @@
 from server import room
 from shell import shell
+from server import player
+import dungeon_server
 
 def encode_direction(direction):
     dir = direction.lower()
@@ -24,11 +26,12 @@ class MoveCommand:
     def help(self):
         shell.Shell().display(self.short_help_msg)
 
-    def execute(self, args):
-        playerName = args[1]
-        direction = args[2]
-        x, y = self.map.findEntityByName(playerName)
-        old_room = self.map.rooms[x][y]
+    def execute(self, args, src):
+        direction = args[1]
+        x, y = self.map.findPlayerByUuid(src)
+
+        print("old_room -- (x:", x, 'y:', y, ')')
+        old_room = self.map.rooms[y][x]
         dir_code = encode_direction(direction)
 
         if not room.direction_is_cardinal(dir_code):
@@ -39,8 +42,9 @@ class MoveCommand:
             raise Exception("trying to move through non-existent door\n\tTODO define/select exception type!")
 
         new_room = self.get_new_room(x, y, dir_code)
-        success = self.do_move(old_room, new_room, playerName)
+        success = self.do_move(old_room, new_room, src)
         self.send_success_events()
+        return []
 
     def get_new_room(self, x, y, direction):
         if direction == room.NORTH:
@@ -51,12 +55,22 @@ class MoveCommand:
             y += 1
         elif direction == room.WEST:
             x -= 1
-        return self.map.rooms[x][y]
+        print('new_room -- (x:', x, 'y:', y, ')')
+        return self.map.rooms[y][x]
 
-    def do_move(self, old_room, new_room, player_name):
-        player = old_room.getEntityByName(player_name)
+    def do_move(self, old_room, new_room, uuid):
+        player = None
+        # try:
+        player = dungeon_server.Server().players[uuid]
         new_room.entities.append(player)
         old_room.entities.remove(player)
+        # except:
+        #     if player is not None:
+        #         new_room.entities.remove(player)
+        #         old_room.entities.remove(player)
+        #         old_room.entities.append(player)
+        #     return False
+
         return True
 
     def send_success_events(self):
@@ -67,7 +81,7 @@ class MoveCommand:
         pass
         #todo send events
 
-    def get_events(self, args):
+    def get_events(self, args, src):
         success = args[0]
         player_name = args[1]
         room_entered = args[2]
@@ -78,25 +92,25 @@ class MoveCommand:
         return [{
             "src": player_name,
             "name": "move",
-            "destination": "room" + room_entered,
+            "dest": {"type": "room", "value": room_entered},
             "message": "player " + player_name + " entered the room."
         },
         {
             "src": player_name,
             "name": "move",
-            "destination": "room" + room_exited,
+            "dest": {"type": "room", "value": room_exited},
             "message": "player " + player_name + " left the room."
         },
+        # {
+        #     "src": player_name,
+        #     "name": "move",
+        #    "dest": {"type": "uuid", "value": src},
+        #     "message": "player " + player_name + " moved from room " + room_exited + " to " + room_entered + "."
+        # },
         {
             "src": player_name,
             "name": "move",
-            "destination": "gm",
-            "message": "player " + player_name + " moved from room " + room_exited + " to " + room_entered + "."
-        },
-        {
-            "src": player_name,
-            "name": "move",
-            "destination": "player "+player_name,
+            "dest": {"type": "uuid", "value": src},
             "success": success,
             "message": "you moved to the " + move_direction
         }]

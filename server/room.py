@@ -135,6 +135,7 @@ class Room:
 
     def containsEntity(self, entityName):
         for entity in self.entities:
+            print("entities:", self.entities)
             if entity.name == entityName:
                 return True
         return False
