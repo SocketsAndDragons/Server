@@ -142,13 +142,17 @@ class Server:
             rule = self.dest_rules[rule_name]
             targets = rule.get_targets(event["dest"])
 
-            # if event["dest"]["type"] == "uuid":
-            #     targets.append(event["dest"]["value"])
-            # else:
-            #     print("I have no idea what that destination is")
+            if "exclude" in event["dest"]:
 
+                to_exclude = event["dest"]["exclude"]
+            else:
+                to_exclude = []
+
+            print("targets:", targets)
+            print("to_exclude:", to_exclude)
             for target in targets:
-                dragon.stream_send_dict(self.clients[target], event)
+                if target not in to_exclude:
+                    dragon.stream_send_dict(self.clients[target], event)
 
 
 if __name__ == "__main__":

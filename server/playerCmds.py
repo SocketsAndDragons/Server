@@ -53,12 +53,12 @@ class MoveCommand:
             "src": player_name,
             "name": "move",
             "dest": {"type": "room", "x": room_entered[0], "y": room_entered[1]},
-            "message": player_name + " left the room."
+            "message": player_name + " left the room to the " + move_direction + "."
         },
         {
             "src": player_name,
             "name": "move",
-            "dest": {"type": "room", "x": room_exited[0], "y": room_exited[1]},
+            "dest": {"type": "room", "exclude": [uuid], "x": room_exited[0], "y": room_exited[1]},
             "message": "player " + player_name + " entered the room."
         },
         {
@@ -90,9 +90,13 @@ class MoveCommand:
 
         return True
 
-    def get_fail_events(self):
-        pass
-        #todo send events
+    def get_fail_events(self, msg, uuid):
+        return [{
+            "name": "move",
+            "success": False,
+            "message": msg,
+            "dest": {"type": "uuid", "value": uuid},
+        }]
 
 
 class PingCommand:
