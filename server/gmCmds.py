@@ -155,13 +155,15 @@ class NumberOfPlayersRule(ParserRuleTemplate):
 
     def room_middle(self, line, index, n_rooms):
         offset = 3
+        ls = []
         for j in range(n_rooms):
-            room = self.map.rooms[index][j] # [j]
+            room = self.map.rooms[index][j]
             split_index = offset + (j * 6) + 2
             num_players = 0
+            ls += room.entities
             for entity in room.entities:
-                if type(entity) == player.Player:
-                    num_players += 1
+                # if type(entity) == player.Player:
+                num_players += 1
             line = line[:split_index] + str(num_players) + line[split_index + 1:]
 
         return line
