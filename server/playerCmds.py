@@ -111,15 +111,14 @@ class PingCommand:
     def execute(self, args, src):
         player_name = src
         message = "Pong!"
-
         return [{
-			"name": "pong",
-			"message": "Pong!",
-			"dest": {
-				"type": "uuid",
-				"value": src
-			}
-		}]
+            "name": "pong",
+            "message": "Pong!",
+            "dest": {
+                "type": "uuid",
+                "value": src
+            }
+        }]
 
 class SayCommand:
 
@@ -131,63 +130,84 @@ class SayCommand:
         shell.Shell().display(self.short_help_msg)
 
     def execute(self, args, src):
-        player_name = src
+        player_name = dungeon_server.Server().players[src].name
         message = player_name + " says \"" + self.get_message(args) + "\""
 
-        current_room = 'a1'
-        cmd_args = [player_name, current_room, message]
-        return cmd_args
+        current_room = 'd2'
+        x = 3
+        y = 1
+        return [{
+            "src": player_name,
+            "name": "say",
+            "dest": {"type": "room", "x": x, "y": y},
+            "message": message,
+        }]
 
     def get_message(self, args):
         return " ".join(args[1:])
-
-    def get_events(self, args):
-        player_name = args[0]
-        room = args[1]
-        message = args[2]
-        return [{
-            "src player": player_name,
-            "name": "say",
-            "destination": "room " + room,
-            "message": message
-        }]
 
 
 class ShoutCommand:
 
     def __init__(self, map):
         self.map = map
-        self.short_help_msg = "Use an action to say something to players in the same or adjacent rooms."
+        self.short_help_msg = "say something to other players in the same room. This does not cost an action."
 
     def help(self):
         shell.Shell().display(self.short_help_msg)
 
-    def execute(self, args):
-        playerName = args[1]
-        message = args[1] + " is shouting: \"" + self.get_message(args) + "\""
+    def execute(self, args, src):
+        player_name = dungeon_server.Server().players[src].name
+        message = player_name + " shouted \"" + self.get_message(args) + "\""
 
-    def get_events(self, args):
-        return [{}]
+        return [{
+            "src": player_name,
+            "name": "say",
+            "dest": {"type": "all"},
+            "message": message,
+        }]
 
     def get_message(self, args):
-        return " ".join(args[2:])
+        return " ".join(args[1:])
 
 
 class WhisperCommand:
 
     def __init__(self, map):
         self.map = map
-        self.short_help_msg = "TODO help for this method."
+        self.short_help_msg = "say something to other players in the same room. This does not cost an action."
 
     def help(self):
         shell.Shell().display(self.short_help_msg)
 
-    def execute(self, args):
-        playerName = args[1]
-        message = args[1] + " whispered to you: \"" + self.get_message(args) + "\""
+    def execute(self, args, src):
+        player_name = dungeon_server.Server().players[src].name
+        if len(args) < 4 or args[1] != 'to':
+            return dungeon_server.Server().send_error_event("malformed whisper command, try 'whisper to <name> <message>...", src)
+        whisper_target = args[3]
+
+        server = dungeon_server.Server()
+        x, y = server.map.findPlayerByUuid(src)
+        current_room = server.map.get_room(x, y)
+
+        target = None
+        for entity in current_room.entities:
+            if entity.name == whisper_target and type(entity) == player.Player:
+                target = entity.uuid
+                break
+        if target is None:
+            return dungeon_server.Server().send_error_event(player_name + " is not in this room.", src)
+
+        message = player_name + " whispered to you \"" + self.get_message(args) + "\""
+        return [{
+            "src": player_name,
+            "name": "say",
+            "dest": {"type": "uuid", "value": target},
+            "message": message,
+        }]
 
     def get_message(self, args):
-        return " ".join(args[2:])
+        return " ".join(args[1:])
 
-    def get_events(self, args):
-        return [{}]
+
+

@@ -131,9 +131,13 @@ class Server:
                         self.send_event(event)
 
                 else:
-                    print("command '"+cmd_name+"' not recognized")
+                    msg = "command '"+cmd_name+"' not recognized"
+                    self.send_error_event(msg, src)
             except Exception as e:
-                print("an error occurred executing the command", cmd_name, "with the arguments", args)
+                msg = "an error occurred executing the command" + cmd_name #, "with the arguments" + str(args)
+                print(e)
+                print(msg)
+                self.send_error_event(msg, src)
                 raise e
 
         def send_event(self, event):
@@ -153,6 +157,13 @@ class Server:
             for target in targets:
                 if target not in to_exclude:
                     dragon.stream_send_dict(self.clients[target], event)
+
+        def send_error_event(self, msg, src):
+            event = {
+                "message": msg,
+                "dest": {"type": "uuid", "value": src}
+            }
+            self.send_event(event)
 
 
 if __name__ == "__main__":

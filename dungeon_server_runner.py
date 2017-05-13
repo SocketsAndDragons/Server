@@ -10,6 +10,7 @@ server = dungeon_server.Server()
 
 server.cmds["say"] = playerCmds.SayCommand(server.map)
 server.cmds["shout"] = playerCmds.ShoutCommand(server.map)
+server.cmds["whisper"] = playerCmds.WhisperCommand(server.map)
 server.cmds["move"] = playerCmds.MoveCommand(server.map)
 server.cmds["ping"] = playerCmds.PingCommand(server.map)
 server.cmds["map"] = gmCmds.MapCommand(server.map)
