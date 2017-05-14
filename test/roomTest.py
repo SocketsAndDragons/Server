@@ -3,7 +3,7 @@ Author: Thomas Bonatti (thomasbonatti2695@gmail.com)
 """
 
 import unittest
-from Server.server import room
+from server import room
 
 
 class EncodeDecodeDirection(unittest.TestCase):

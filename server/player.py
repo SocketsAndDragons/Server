@@ -1,32 +1,49 @@
 
-STARTING_HP = 20
-STARTING_ACC = 90
-STARTING_MAX_DMG = 6
-STARTING_MIN_DMG = 2
-STARTING_DEF = 10
-STARTING_ARM = 0
-STARTING_SPD = 5
+# STARTING_HP = 20
+# STARTING_ACC = 90
+# STARTING_MAX_DMG = 6
+# STARTING_MIN_DMG = 2
+# STARTING_DEF = 10
+# STARTING_ARM = 0
+# STARTING_SPD = 5
+
+BASE_STATS = {
+    'maxHp': 20,
+    'accuracy': 90,
+    'maxDamage': 6,
+    'minDamage': 2,
+    'defense': 10,
+    'armor': 0,
+    'speed': 5
+}
+
+class Character:
+
+    def __init__(self, name, starting_stats):
+        self.name = name
+        self.wounds = 0
+
+        for stat in BASE_STATS:
+            if not stat in starting_stats:
+                starting_stats[stat] = BASE_STATS[stat]
+
+        self.stats = starting_stats
+
+    def get_stat(self, stat):
+        return self.stats[stat]
 
 
-class Player:
+class Player(Character):
 
-    def __init__(self, number, name, uuid):
+    def __init__(self, number, name, uuid, **starting_stats):
+        super(Player, self).__init__(name, starting_stats)
 
         self.number = number
-        self.name = name
         self.uuid = uuid
 
         self.weapon = None
         self.armorEquiped = None
         self.accessory = None
-        self.wounds = 0
-        self.maxHp = STARTING_HP
-        self.accuracy = STARTING_ACC
-        self.maxDamage = STARTING_MAX_DMG
-        self.minDamage = STARTING_MIN_DMG
-        self.defense = STARTING_DEF
-        self.armorStat = STARTING_ARM
-        self.speed = STARTING_SPD
 
     def __repr__(self):
         return self.name + "(player " + str(self.number) + ")"
@@ -51,32 +68,35 @@ class Player:
         return self.getMaxHp() - self.wounds
 
     def getMaxHp(self):
-        return self.getStat("maxHp")
+        return self.get_stat("maxHp")
 
-    def getStat(self, stat):
-        stat = getattr(self, stat)
+    def get_stat(self, stat):
+        value = self.stats[stat]
         if self.weapon is not None:
-            stat += getattr(self.weapon, stat)
+            value += self.weapon.get_stat(stat)
         if self.armorEquiped is not None:
-            stat += getattr(self.armorEquiped, stat)
+            value += getattr(self.armorEquiped, stat)
         if self.accessory is not None:
-            stat += getattr(self.accessory, stat)
-        return stat
+            value += getattr(self.accessory, stat)
+        return value
+
+    def describe(self):
+        return "it's " + self.name
 
     def getMaxHp(self):
-        return self.getStat("maxHp")
+        return self.get_stat("maxHp")
 
     def getMaxDamage(self):
-        return self.getStat("maxDamage")
+        return self.get_stat("maxDamage")
 
     def getMinDamage(self):
-        return self.getStat("minDamage")
+        return self.get_stat("minDamage")
 
     def getDefense(self):
-        return self.getStat("defense")
+        return self.get_stat("defense")
 
     def getArmorStat(self):
-        return self.getStat("armorStat")
+        return self.get_stat("armorStat")
 
     def getSpeed(self):
-        return self.getStat("speed")
+        return self.get_stat("speed")

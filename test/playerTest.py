@@ -3,8 +3,8 @@ Author: Thomas Bonatti (thomasbonatti2695@gmail.com)
 """
 
 import unittest
-from Server.server.player import Player
-from Server.server import room
+from server.player import Player
+from server import room
 
 
 class MapTest(unittest.TestCase):
@@ -42,7 +42,7 @@ class MapTest(unittest.TestCase):
 
     def testGetStat(self):
         expected = self.player.maxHp
-        received = self.player.getStat("maxHp")
+        received = self.player.get_stat("maxHp")
         self.assertEqual(expected, received)
 
 

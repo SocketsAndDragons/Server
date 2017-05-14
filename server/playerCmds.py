@@ -183,9 +183,11 @@ class WhisperCommand:
     def execute(self, args, src):
         player_name = dungeon_server.Server().players[src].name
         if len(args) < 4 or args[1] != 'to':
-            return dungeon_server.Server().send_error_event("malformed whisper command, try 'whisper to <name> <message>...", src)
-        whisper_target = args[3]
+            msg = "malformed whisper command, try 'whisper to <name> <message>...'"
+            dungeon_server.Server().send_error_event(msg, src)
+            return []
 
+        whisper_target = args[2]
         server = dungeon_server.Server()
         x, y = server.map.findPlayerByUuid(src)
         current_room = server.map.get_room(x, y)
@@ -196,9 +198,11 @@ class WhisperCommand:
                 target = entity.uuid
                 break
         if target is None:
-            return dungeon_server.Server().send_error_event(player_name + " is not in this room.", src)
+            msg = player_name + " is not in this room."
+            dungeon_server.Server().send_error_event(msg, src)
+            return []
 
-        message = player_name + " whispered to you \"" + self.get_message(args) + "\""
+        message = player_name + " whispered to you \"" + " ".join(args[3:]) + "\""
         return [{
             "src": player_name,
             "name": "say",
@@ -206,8 +210,6 @@ class WhisperCommand:
             "message": message,
         }]
 
-    def get_message(self, args):
-        return " ".join(args[1:])
 
 
 

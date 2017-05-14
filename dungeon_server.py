@@ -152,8 +152,6 @@ class Server:
             else:
                 to_exclude = []
 
-            print("targets:", targets)
-            print("to_exclude:", to_exclude)
             for target in targets:
                 if target not in to_exclude:
                     dragon.stream_send_dict(self.clients[target], event)

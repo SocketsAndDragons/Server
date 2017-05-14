@@ -1,9 +1,9 @@
 
 import unittest
-from Server.server.playerCmds import MoveCommand
-from Server.server.playerCmds import SayCommand
-from Server.server.dungeonMap import Map
-from Server.server import room
+from server.playerCmds import MoveCommand
+from server.playerCmds import SayCommand
+from server.dungeonMap import Map
+from server import room
 
 
 class PlayerMock:
