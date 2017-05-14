@@ -83,7 +83,7 @@ class Server:
             self.next_new_player_number += 1
             if name is None:
                 name = 'player' + str(player_number)
-            self.players[uuid] = player.Player(player_number, name, uuid)
+            self.players[uuid] = characters.Player(player_number, name, uuid)
             print(type(self.players[uuid]))
             print(self.players[uuid].name, "added to the game")
             self.map.add_new_player(self.players[uuid])

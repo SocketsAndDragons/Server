@@ -1,6 +1,6 @@
 from server import room
 from shell import shell
-from server import player
+from server import characters
 import dungeon_server
 
 def encode_direction(direction):
@@ -194,7 +194,7 @@ class WhisperCommand:
 
         target = None
         for entity in current_room.entities:
-            if entity.name == whisper_target and type(entity) == player.Player:
+            if entity.name == whisper_target and type(entity) == characters.Player:
                 target = entity.uuid
                 break
         if target is None:

@@ -17,6 +17,7 @@ BASE_STATS = {
     'speed': 5
 }
 
+
 class Character:
 
     def __init__(self, name, starting_stats):
@@ -31,22 +32,6 @@ class Character:
 
     def get_stat(self, stat):
         return self.stats[stat]
-
-
-class Player(Character):
-
-    def __init__(self, number, name, uuid, **starting_stats):
-        super(Player, self).__init__(name, starting_stats)
-
-        self.number = number
-        self.uuid = uuid
-
-        self.weapon = None
-        self.armor_equiped = None
-        self.accessory = None
-
-    def __repr__(self):
-        return self.name + "(player " + str(self.number) + ")"
 
     def heal_damage(self, healing):
         if healing < 0: return False
@@ -67,6 +52,22 @@ class Player(Character):
     def get_hp_left(self):
         return self.get_stat('maxHp') - self.wounds
 
+
+class Player(Character):
+
+    def __init__(self, number, name, uuid, **starting_stats):
+        super(Player, self).__init__(name, starting_stats)
+
+        self.number = number
+        self.uuid = uuid
+
+        self.weapon = None
+        self.armor_equiped = None
+        self.accessory = None
+
+    def __repr__(self):
+        return self.name + "(player " + str(self.number) + ")"
+
     def get_stat(self, stat):
         value = self.stats[stat]
         if self.weapon is not None:
@@ -79,3 +80,13 @@ class Player(Character):
 
     def describe(self):
         return "it's " + self.name
+
+
+class Monster(Character):
+
+    def __init__(self, name, **starting_stats):
+        super(Player, self).__init__(name, starting_stats)
+
+    def describe(self):
+        return "it's a " + self.name
+
