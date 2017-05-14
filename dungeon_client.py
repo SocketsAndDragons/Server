@@ -22,7 +22,6 @@ def game_loop(sock,inputs,resps):
 		# Handle inputs
 		try:
 			item = inputs.get(block=False)
-			print("Sending ",item)
 			dragon.stream_send_dict(sock,item)
 		except queue.Empty:
 			time.sleep(0.1)

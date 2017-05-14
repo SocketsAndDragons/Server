@@ -2,6 +2,10 @@ import socket
 import argparse
 import json
 import time
+import logging
+
+# uncomment to see detailed info
+#logging.basicConfig(level=logging.INFO)
 
 def peel_size(data,pos):
 	size = int.from_bytes(data[pos:pos+4],byteorder='big')
@@ -15,7 +19,12 @@ def peel_json(data,pos,size_left):
 		end = pos + size_left
 		return (data[pos:end], end, 0)
 
+def debug_log(msg,debug):
+	if debug:
+		log(msg)
+
 def stream_parse(socket,queue,tag=None,format='dict'):
+
 	# Size of the next JSON unit
 	size = None
 	# Size of the data unit we're parsing
@@ -37,7 +46,7 @@ def stream_parse(socket,queue,tag=None,format='dict'):
 	while True:
 		# A packet is done.
 		if size_left <= 0:
-			print("Packet done: ",msg)
+			logging.info("Packet done: " + msg)
 			if format == 'json':
 				queue.put((tag,msg))
 			elif format == 'dict':
@@ -68,7 +77,7 @@ def stream_parse(socket,queue,tag=None,format='dict'):
 			else:
 				(new_json, pos, size_left) = peel_json(data, pos, size_left)
 				msg += new_json.decode("utf-8")
-				print(pos,size_left,packet_size)
+				logging.info("Status: %d, %d, %d",pos,size,size_left)
 
 def stream_send_dict(socket,dict):
 	stream_send(socket, json.dumps(dict))
@@ -76,6 +85,6 @@ def stream_send_dict(socket,dict):
 def stream_send(socket,json):
 	data = json.encode("utf-8")
 	data = len(data).to_bytes(4, byteorder='big') + data
-	print("Sending packet: ")
-	print(repr(data))
+	logging.info("Sending packet: ")
+	logging.info(repr(data))
 	socket.send(data)
