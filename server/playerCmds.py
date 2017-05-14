@@ -202,7 +202,7 @@ class WhisperCommand:
             dungeon_server.Server().send_error_event(msg, src)
             return []
 
-        message = player_name + " whispered to you \"" + " ".join(args[3:]) + "\""
+        message = whisper_target + " whispered to you \"" + " ".join(args[3:]) + "\""
         return [{
             "src": player_name,
             "name": "say",

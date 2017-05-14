@@ -42,13 +42,13 @@ class Player(Character):
         self.uuid = uuid
 
         self.weapon = None
-        self.armorEquiped = None
+        self.armor_equiped = None
         self.accessory = None
 
     def __repr__(self):
         return self.name + "(player " + str(self.number) + ")"
 
-    def healDamage(self, healing):
+    def heal_damage(self, healing):
         if healing < 0: return False
 
         self.wounds -= healing
@@ -57,46 +57,25 @@ class Player(Character):
 
         return True
 
-    def dealDamage(self, damage):
-        total_damage = damage-self.getArmorStat()
-        print("DEBUG: ", self.getArmorStat())
+    def deal_damage(self, damage):
+        total_damage = damage - self.get_stat('armor')
+        print("DEBUG: ", self.get_stat('armor'))
         if total_damage < 0: return False
         self.wounds += total_damage
         return True
 
-    def getHpLeft(self):
-        return self.getMaxHp() - self.wounds
-
-    def getMaxHp(self):
-        return self.get_stat("maxHp")
+    def get_hp_left(self):
+        return self.get_stat('maxHp') - self.wounds
 
     def get_stat(self, stat):
         value = self.stats[stat]
         if self.weapon is not None:
             value += self.weapon.get_stat(stat)
-        if self.armorEquiped is not None:
-            value += getattr(self.armorEquiped, stat)
+        if self.armor_equiped is not None:
+            value += self.armor_equiped.get_stat(stat)
         if self.accessory is not None:
-            value += getattr(self.accessory, stat)
+            value += self.accessory.get_stat(stat)
         return value
 
     def describe(self):
         return "it's " + self.name
-
-    def getMaxHp(self):
-        return self.get_stat("maxHp")
-
-    def getMaxDamage(self):
-        return self.get_stat("maxDamage")
-
-    def getMinDamage(self):
-        return self.get_stat("minDamage")
-
-    def getDefense(self):
-        return self.get_stat("defense")
-
-    def getArmorStat(self):
-        return self.get_stat("armorStat")
-
-    def getSpeed(self):
-        return self.get_stat("speed")

@@ -12,15 +12,6 @@ BASE_STATS = {
     'speed': 0
 }
 
-class Character:
-
-    def __init__(self, name, starting_stats):
-        self.name = name
-        self.wounds = 0
-
-
-    def get_stat(self, stat):
-        return self.stats[stat]
 
 class Equipment:
 
@@ -46,6 +37,9 @@ class Equipment:
 
         self.stats = starting_stats
 
+    def get_stat(self, stat):
+        return self.stats[stat]
+
 class Item:
 
     def __init__(self, name, singleUse=False, description=''):
@@ -66,6 +60,6 @@ class HealingPotion(Item):
 
     def use(self, player):
         initWounds = player.wounds
-        player.healDamage(10)
+        player.heal_damage(10)
         woundsHealed = initWounds-player.wounds
         Shell().display(player, "used a healing potion to heal", woundsHealed)
