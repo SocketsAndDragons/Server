@@ -27,12 +27,20 @@ def game_loop(sock,inputs,resps):
 		except queue.Empty:
 			time.sleep(0.1)
 
+print("Welcome to die")
+
+hostport = input("Enter the hostname and port of the server (hostname:port) ===>>  ").split(":")
+
+host = hostport[0]
+port = hostport[1]
+
 try:
+	print("\n\n\n")
 	s = socket.socket()
 
-	s.connect(('localhost',8080))
+	s.connect((host,int(port)))
 
-	print("YAYAYY")
+	print("Connection made. Logging in...")
 
 	inputs = queue.Queue()
 	resps = queue.Queue()
@@ -52,6 +60,7 @@ try:
 
 		act = cmd.split()
 		inputs.put(act)
-
+except:
+	print("Failed to connect! You died")
 finally:
 	sys.exit(1)
