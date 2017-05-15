@@ -3,7 +3,7 @@ Author: Thomas Bonatti (thomasbonatti2695@gmail.com)
 """
 
 import unittest
-from Server.server import dungeonMap
+from server import dungeonMap
 
 
 class TestMapParsing(unittest.TestCase):

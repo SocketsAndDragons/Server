@@ -9,7 +9,7 @@ import time
 import uuid
 
 from server import dungeon_map
-from server import player
+from server import characters
 import dragon
 
 
@@ -39,6 +39,8 @@ class Server:
             self.connections = {}
             self.cmds = {}
             self.monsters = []
+
+            self.dest_rules = {}
 
         def accept_new_client(self, client):
             id = str(uuid.uuid4())
@@ -81,7 +83,7 @@ class Server:
             self.next_new_player_number += 1
             if name is None:
                 name = 'player' + str(player_number)
-            self.players[uuid] = player.Player(player_number, name)
+            self.players[uuid] = characters.Player(player_number, name, uuid)
             print(type(self.players[uuid]))
             print(self.players[uuid].name, "added to the game")
             self.map.add_new_player(self.players[uuid])
@@ -129,23 +131,37 @@ class Server:
                         self.send_event(event)
 
                 else:
-                    print("command '"+cmd_name+"' not recognized")
+                    msg = "command '"+cmd_name+"' not recognized"
+                    self.send_error_event(msg, src)
             except Exception as e:
-                print("an error occurred executing the command", cmd_name, "with the arguments", args)
+                msg = "an error occurred executing the command" + cmd_name #, "with the arguments" + str(args)
+                print(e)
+                print(msg)
+                self.send_error_event(msg, src)
                 raise e
 
         def send_event(self, event):
             print('sending event:', event)
+            rule_name = event["dest"]["type"]
+            rule = self.dest_rules[rule_name]
+            targets = rule.get_targets(event["dest"])
 
-            targets = []
+            if "exclude" in event["dest"]:
 
-            if event["dest"]["type"] == "uuid":
-                targets.append(event["dest"]["value"])
+                to_exclude = event["dest"]["exclude"]
             else:
-                print("I have no idea what that destination is")
+                to_exclude = []
 
             for target in targets:
-                dragon.stream_send_dict(self.clients[target], event)
+                if target not in to_exclude:
+                    dragon.stream_send_dict(self.clients[target], event)
+
+        def send_error_event(self, msg, src):
+            event = {
+                "message": msg,
+                "dest": {"type": "uuid", "value": src}
+            }
+            self.send_event(event)
 
 
 if __name__ == "__main__":

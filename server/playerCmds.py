@@ -1,6 +1,6 @@
 from server import room
 from shell import shell
-from server import player
+from server import characters
 import dungeon_server
 
 def encode_direction(direction):
@@ -35,18 +35,41 @@ class MoveCommand:
         dir_code = encode_direction(direction)
 
         if not room.direction_is_cardinal(dir_code):
-            self.send_fail_events()
-            raise Exception("trying to move in non-cardinal direction\n\tTODO define/select exception type!")
+            return self.get_fail_events("you can only move in a cardinal direction (north, south, east or west)")
         if not old_room.has_doors(dir_code):
-            self.send_fail_events()
-            raise Exception("trying to move through non-existent door\n\tTODO define/select exception type!")
+            return self.get_fail_events("there is no door in that direction!")
 
-        new_room = self.get_new_room(x, y, dir_code)
+        old_addr = (x, y)
+        x, y = self.get_new_room_addr(x, y, dir_code)
+        new_room = self.map.rooms[y][x]
         success = self.do_move(old_room, new_room, src)
-        self.send_success_events()
-        return []
 
-    def get_new_room(self, x, y, direction):
+        return self.get_events(src, direction, old_addr, (x,y))
+
+    def get_events(self, uuid, move_direction, room_entered, room_exited):
+        player_name = dungeon_server.Server().players[uuid].name
+
+        return [{
+            "src": player_name,
+            "name": "move",
+            "dest": {"type": "room", "x": room_entered[0], "y": room_entered[1]},
+            "message": player_name + " left the room to the " + move_direction + "."
+        },
+        {
+            "src": player_name,
+            "name": "move",
+            "dest": {"type": "room", "exclude": [uuid], "x": room_exited[0], "y": room_exited[1]},
+            "message": "player " + player_name + " entered the room."
+        },
+        {
+            "src": player_name,
+            "name": "move",
+            "dest": {"type": "uuid", "value": uuid},
+            "success": True,
+            "message": "you moved to the " + move_direction
+        }]
+
+    def get_new_room_addr(self, x, y, direction):
         if direction == room.NORTH:
             y -= 1
         elif direction == room.EAST:
@@ -56,7 +79,7 @@ class MoveCommand:
         elif direction == room.WEST:
             x -= 1
         print('new_room -- (x:', x, 'y:', y, ')')
-        return self.map.rooms[y][x]
+        return (x, y)
 
     def do_move(self, old_room, new_room, uuid):
         player = None
@@ -64,56 +87,17 @@ class MoveCommand:
         player = dungeon_server.Server().players[uuid]
         new_room.entities.append(player)
         old_room.entities.remove(player)
-        # except:
-        #     if player is not None:
-        #         new_room.entities.remove(player)
-        #         old_room.entities.remove(player)
-        #         old_room.entities.append(player)
-        #     return False
 
         return True
 
-    def send_success_events(self):
-        pass
-        #todo send events
-
-    def send_fail_events(self):
-        pass
-        #todo send events
-
-    def get_events(self, args, src):
-        success = args[0]
-        player_name = args[1]
-        room_entered = args[2]
-        room_exited = args[3]
-        move_direction = args[4]
-
-
+    def get_fail_events(self, msg, uuid):
         return [{
-            "src": player_name,
             "name": "move",
-            "dest": {"type": "room", "value": room_entered},
-            "message": "player " + player_name + " entered the room."
-        },
-        {
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "room", "value": room_exited},
-            "message": "player " + player_name + " left the room."
-        },
-        # {
-        #     "src": player_name,
-        #     "name": "move",
-        #    "dest": {"type": "uuid", "value": src},
-        #     "message": "player " + player_name + " moved from room " + room_exited + " to " + room_entered + "."
-        # },
-        {
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "uuid", "value": src},
-            "success": success,
-            "message": "you moved to the " + move_direction
+            "success": False,
+            "message": msg,
+            "dest": {"type": "uuid", "value": uuid},
         }]
+
 
 class PingCommand:
 
@@ -127,15 +111,14 @@ class PingCommand:
     def execute(self, args, src):
         player_name = src
         message = "Pong!"
-
         return [{
-			"name": "pong",
-			"message": "Pong!",
-			"dest": {
-				"type": "uuid",
-				"value": src
-			}
-		}]
+            "name": "pong",
+            "message": "Pong!",
+            "dest": {
+                "type": "uuid",
+                "value": src
+            }
+        }]
 
 class SayCommand:
 
@@ -147,63 +130,86 @@ class SayCommand:
         shell.Shell().display(self.short_help_msg)
 
     def execute(self, args, src):
-        player_name = src
+        player_name = dungeon_server.Server().players[src].name
         message = player_name + " says \"" + self.get_message(args) + "\""
 
-        current_room = 'a1'
-        cmd_args = [player_name, current_room, message]
-        return cmd_args
+        current_room = 'd2'
+        x = 3
+        y = 1
+        return [{
+            "src": player_name,
+            "name": "say",
+            "dest": {"type": "room", "x": x, "y": y},
+            "message": message,
+        }]
 
     def get_message(self, args):
         return " ".join(args[1:])
-
-    def get_events(self, args):
-        player_name = args[0]
-        room = args[1]
-        message = args[2]
-        return [{
-            "src player": player_name,
-            "name": "say",
-            "destination": "room " + room,
-            "message": message
-        }]
 
 
 class ShoutCommand:
 
     def __init__(self, map):
         self.map = map
-        self.short_help_msg = "Use an action to say something to players in the same or adjacent rooms."
+        self.short_help_msg = "say something to other players in the same room. This does not cost an action."
 
     def help(self):
         shell.Shell().display(self.short_help_msg)
 
-    def execute(self, args):
-        playerName = args[1]
-        message = args[1] + " is shouting: \"" + self.get_message(args) + "\""
+    def execute(self, args, src):
+        player_name = dungeon_server.Server().players[src].name
+        message = player_name + " shouted \"" + self.get_message(args) + "\""
 
-    def get_events(self, args):
-        return [{}]
+        return [{
+            "src": player_name,
+            "name": "say",
+            "dest": {"type": "all"},
+            "message": message,
+        }]
 
     def get_message(self, args):
-        return " ".join(args[2:])
+        return " ".join(args[1:])
 
 
 class WhisperCommand:
 
     def __init__(self, map):
         self.map = map
-        self.short_help_msg = "TODO help for this method."
+        self.short_help_msg = "say something to other players in the same room. This does not cost an action."
 
     def help(self):
         shell.Shell().display(self.short_help_msg)
 
-    def execute(self, args):
-        playerName = args[1]
-        message = args[1] + " whispered to you: \"" + self.get_message(args) + "\""
+    def execute(self, args, src):
+        player_name = dungeon_server.Server().players[src].name
+        if len(args) < 4 or args[1] != 'to':
+            msg = "malformed whisper command, try 'whisper to <name> <message>...'"
+            dungeon_server.Server().send_error_event(msg, src)
+            return []
 
-    def get_message(self, args):
-        return " ".join(args[2:])
+        whisper_target = args[2]
+        server = dungeon_server.Server()
+        x, y = server.map.findPlayerByUuid(src)
+        current_room = server.map.get_room(x, y)
 
-    def get_events(self, args):
-        return [{}]
+        target = None
+        for entity in current_room.entities:
+            if entity.name == whisper_target and type(entity) == characters.Player:
+                target = entity.uuid
+                break
+        if target is None:
+            msg = whisper_target + " is not in this room."
+            dungeon_server.Server().send_error_event(msg, src)
+            return []
+
+        message = whisper_target + " whispered to you \"" + " ".join(args[3:]) + "\""
+        return [{
+            "src": player_name,
+            "name": "say",
+            "dest": {"type": "uuid", "value": target},
+            "message": message,
+        }]
+
+
+
+
