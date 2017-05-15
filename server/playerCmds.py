@@ -198,7 +198,7 @@ class WhisperCommand:
                 target = entity.uuid
                 break
         if target is None:
-            msg = player_name + " is not in this room."
+            msg = whisper_target + " is not in this room."
             dungeon_server.Server().send_error_event(msg, src)
             return []
 
