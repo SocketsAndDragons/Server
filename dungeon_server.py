@@ -9,7 +9,7 @@ import time
 import uuid
 
 from server import dungeon_map
-from server import player
+from server import characters
 import dragon
 
 

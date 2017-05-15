@@ -2,7 +2,7 @@
 
 import dungeon_server
 from server import dungeon_map
-from server import player
+from server import characters
 
 # THIS IS NOT TESTED
 
@@ -22,7 +22,7 @@ class RoomNameDestRule:
 
         targets = []
         for entity in room.entities:
-            if type(entity) == player.Player:
+            if type(entity) == characters.Player:
                 targets.append(entity.uuid)
         return targets
 
@@ -37,7 +37,7 @@ class RoomDestRule:
 
         targets = []
         for entity in room.entities:
-            if type(entity) == player.Player:
+            if type(entity) == characters.Player:
                 targets.append(entity.uuid)
         return targets
 

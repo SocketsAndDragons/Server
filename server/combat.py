@@ -1,4 +1,7 @@
 
+def get_combat_commands():
+    return {}
+
 class Combat:
 
     def __init__(self, players, monsters):
@@ -15,6 +18,8 @@ class Combat:
             self.monsters = self.__build_dict(monsters)
         else:
             raise Exception("monsters must be added as either a list or a dictinary")
+
+        self.cmds = get_combat_commands()
 
         self.actions = {}
         for player_name in self.players:
@@ -33,7 +38,7 @@ class Combat:
         # msg = "it's a fight between "
         # player_names = []
         # for player in self.players:
-        #     player_names.append(player.name)
+        #     player_names.append(characters.name)
         #
         # msg += ", ".join(player_names)
         #
@@ -46,6 +51,7 @@ class Combat:
         return "it's a fight"
 
     def execute_round(self):
+
         for actor in self.actions:
             action = self.actions[actor]
 

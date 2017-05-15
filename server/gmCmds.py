@@ -1,4 +1,4 @@
-import server.player
+from server import characters
 
 class MapCommand:
 
@@ -162,7 +162,7 @@ class NumberOfPlayersRule(ParserRuleTemplate):
             num_players = 0
             ls += room.entities
             for entity in room.entities:
-                # if type(entity) == player.Player:
+                # if type(entity) == characters.Player:
                 num_players += 1
             line = line[:split_index] + str(num_players) + line[split_index + 1:]
 
