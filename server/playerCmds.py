@@ -27,16 +27,33 @@ class LookCommand:
 
     def execute(self, args, src):
         player_name = src
-        message = "Pong!"
+
+        x, y = self.map.findPlayerByUuid(src)
+
+        print("room -- (x:", x, 'y:', y, ')')
+        room = self.map.rooms[y][x]
+
+        message = "You look around the room.\n"
+        
+        players = []
+        for entity in room.entities:
+            if isinstance(entity, characters.Player):
+                players.append(entity.name)
+
+        if len(players) > 0:
+            player_string = ", ".join(players)
+            message += "You see " + player_string + "\n"
+        else:
+            message += "You see no other people."
 
         return [{
-			"name": "looking",
-			"message": "You forgot to bring a torch. It is dark."
-			"dest": {
-				"type": "uuid",
-				"value": src
-			}
-		}]
+        "name": "looking",
+        "message": message,
+        "dest": {
+            "type": "uuid",
+            "value": src
+        }
+        }]
 
 class MoveCommand:
 
@@ -230,7 +247,3 @@ class WhisperCommand:
             "dest": {"type": "uuid", "value": target},
             "message": message,
         }]
-
-
-
-
