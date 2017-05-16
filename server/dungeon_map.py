@@ -3,6 +3,19 @@ import dungeon_server
 
 ORD_OFFSET = 97
 
+
+def getRoomAddr(self, strAddr):
+    letter = strAddr[0].lower()
+    x = ord(letter) - ORD_OFFSET
+    y = int(strAddr[1:])-1
+    return x, y
+
+
+def get_addr_name(self, x, y):
+    letter = ord(x + ORD_OFFSET)
+    return letter + str(y)
+
+
 class Map():
 
     def __init__(self, width, height):
@@ -34,12 +47,6 @@ class Map():
 
     def get_room(self, x, y):
         return self.rooms[y][x]
-
-    def getRoomAddr(self, strAddr):
-        letter = strAddr[0].lower()
-        x = ord(letter) - ORD_OFFSET
-        y = int(strAddr[1:])-1
-        return x, y
 
     def address_of_room(self, room):
         for y in range(len(self.rooms)):
