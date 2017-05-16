@@ -16,6 +16,27 @@ def encode_direction(direction):
     else:
         raise Exception("playerCmds.MoveCommand.encode_direction TODO make an error msg")
 
+class LookCommand:
+
+    def __init__(self, map):
+        self.map = map
+        self.short_help_msg = "Describes the room you're in."
+
+    def help(self):
+        shell.Shell().display(self.short_help_msg)
+
+    def execute(self, args, src):
+        player_name = src
+        message = "Pong!"
+
+        return [{
+			"name": "looking",
+			"message": "You forgot to bring a torch. It is dark."
+			"dest": {
+				"type": "uuid",
+				"value": src
+			}
+		}]
 
 class MoveCommand:
 
