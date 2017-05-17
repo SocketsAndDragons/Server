@@ -405,7 +405,7 @@ class UseItemCommand:
             msg = "you do not have the item '" + item_name + "'"
             server.send_error_event(msg, src)
             return []
-        msg = "you used up your '" + item_name + "'\n"
+        msg = "you used your '" + item_name + "'\n"
         msg += item.use(player)
         if item.singleUse:
             player.inventory.remove_item(item)

@@ -108,4 +108,17 @@ class HealingPotion(Item):
         initWounds = player.wounds
         player.heal_damage(10)
         woundsHealed = initWounds-player.wounds
-        Shell().display(player, "used a healing potion to heal", woundsHealed)
+        return "you healed " + str(woundsHealed)
+
+
+class PoisonPotion(Item):
+
+    def __init__(self, name="poison potion"):
+        super(PoisonPotion, self).__init__(name, True, "deals 10 damage")
+
+    def use(self, player):
+        initWounds = player.wounds
+        player.deal_damage(10)
+        damage_dealt = player.wounds-initWounds
+        return "you suffered " + str(damage_dealt) + " damage"
+

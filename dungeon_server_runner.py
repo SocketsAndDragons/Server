@@ -34,7 +34,7 @@ server.dest_rules["all"] = destination.AllDestRule()
 server.dest_rules["name"] = destination.NameDestRule()
 
 rooms = server.map.rooms
-rooms[1][3].entities = [items.ItemContainer("chest", MockItem())]
+rooms[1][3].entities = [items.ItemContainer("chest", MockItem(), items.HealingPotion(), items.PoisonPotion())]
 
 
 server.start_socket()
