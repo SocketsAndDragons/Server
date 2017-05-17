@@ -1,5 +1,3 @@
-from shell import Shell
-from server import stats
 
 
 BASE_STATS = {
@@ -39,6 +37,54 @@ class Equipment:
 
     def get_stat(self, stat):
         return self.stats[stat]
+
+
+class ItemContainer:
+
+    def __init__(self, name, *starting_items):
+        self.name = name
+        self.items = list(starting_items)
+
+    def receive_item(self, item):
+        self.add_item(item)
+
+    def size(self):
+        return len(self.items)
+
+    def describe(self):
+        msg = self.name
+        for item in self.items:
+            msg += "\n\t" + item.name
+        return msg
+
+    def get_item(self, name):
+        for item in self.items:
+            if item.name == name:
+                return item
+
+    def remove_item(self, item):
+        self.items.remove(item)
+
+    def remove_item_name(self, name):
+        for i in range(len(self.items)):
+            item = self.items[i]
+            if item.name == name:
+                self.items.remove(item)
+                return True
+        return False
+
+    def clear(self):
+        self.items = []
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def __contains__(self, name):
+        for item in self.items:
+            if item.name == name:
+                return True
+        return False
+
 
 class Item:
 
