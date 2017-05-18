@@ -1,22 +1,24 @@
 #!/usr/bin/python3
 
 import dungeon_server
-from server import playerCmds
 import destination
+
 from server import gmCmds
+from server import playerCmds
+from server import combatCmds
 from server import items
 from server import characters
+
 
 class MockItem:
     def __init__(self):
         self.name = "mock item"
 
 
-
-
 server = dungeon_server.Server()
 
 server.cmds["map"] = gmCmds.MapCommand(server.map)
+
 server.cmds["say"] = playerCmds.SayCommand(server.map)
 server.cmds["shout"] = playerCmds.ShoutCommand(server.map)
 server.cmds["look"] = playerCmds.LookCommand(server.map)
@@ -31,6 +33,8 @@ server.cmds["use"] = playerCmds.UseItemCommand()
 server.cmds["stats"] = playerCmds.StatsCommand()
 server.cmds["help"] = playerCmds.HelpCommand()
 
+server.cmds["attack"] = combatCmds.AttackCommand()
+
 server.dest_rules["uuid"] = destination.UuidDestRule()
 server.dest_rules["room"] = destination.RoomDestRule()
 server.dest_rules["gm"] = destination.GmDestRule()
@@ -40,7 +44,7 @@ server.dest_rules["name"] = destination.NameDestRule()
 rooms = server.map.rooms
 rooms[1][3].entities = [
         items.ItemContainer("chest", MockItem(), items.HealingPotion(), items.PoisonPotion()),
-        characters.Monster("scary monster")
+        characters.Monster("scary monster", maxHp=5)
 ]
 
 

@@ -70,7 +70,8 @@ class Server:
                     item = self.cmds_received.get(block=False)
                     print('item:')
                     print(item)
-                    # (id, action)
+                    if item == '':
+                        continue
                     cmd_sender = item[0]
                     cmd = item[1]
                     cmd_name = cmd[0]
@@ -79,13 +80,13 @@ class Server:
                 except queue.Empty:
                     time.sleep(0.01)
 
-        def register_new_player(self, uuid, name=None):
+        def register_new_player(self, uuid, name=None, times_killed=0):
             print("registering new player")
             player_number = self.next_new_player_number
             self.next_new_player_number += 1
             if name is None:
                 name = 'player' + str(player_number)
-            self.players[uuid] = characters.Player(player_number, name, uuid)
+            self.players[uuid] = characters.Player(player_number, name, uuid, deaths=times_killed)
             print(type(self.players[uuid]))
             print(self.players[uuid].name, "added to the game")
             self.map.add_new_player(self.players[uuid])
@@ -97,6 +98,8 @@ class Server:
             reply["number"] = player_number
             reply["type"] = "player"
             reply["message"] = "connected successfully"
+            print("DEBUG: players:")
+            print(self.players)
             return reply
 
         def start_socket(self):
@@ -165,6 +168,7 @@ class Server:
 
                 events = entity.action_used(player, current_room)
                 for event in events:
+                    pass
                     self.send_event(event)
 
         def send_event(self, event):

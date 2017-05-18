@@ -52,7 +52,12 @@ class ItemContainer:
         return len(self.items)
 
     def describe(self):
-        msg = self.name
+        msg = self.name + "("
+        if len(self.items) == 0:
+            msg += "empty)\n\tthere is nothing here."
+        else:
+            msg += str(len(self.items)) + " items`)"
+
         for item in self.items:
             msg += "\n\t" + item.name
         return msg

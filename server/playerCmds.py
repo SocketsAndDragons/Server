@@ -75,7 +75,7 @@ class LookCommand:
 
         if len(players) > 0:
             player_string = ", ".join(players)
-            message += + player_string + " are in the room.\n"
+            message += player_string + " are in the room.\n"
         else:
             message += "You see no other people.\n"
 
@@ -360,12 +360,12 @@ class InvCommand:
 
     def execute(self, args, src):
         player = dungeon_server.Server().players[src]
-        msg = ''
-        for item in player.inventory.items:
-            msg += item.name + '\n'
-
-        if msg == '':
-            msg = "there are no items in your inventory"
+        msg = player.inventory.describe()
+        # for item in player.inventory.items:
+        #     msg += item.name + '\n'
+        #
+        # if msg == '':
+        #     msg = "there are no items in your inventory"
 
         return [{
             "message": msg,

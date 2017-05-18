@@ -12,15 +12,111 @@ from random import randint
 # STARTING_SPD = 5
 
 BASE_STATS = {
-    'maxHp': 20,
+    'maxHp': 25,
     'accuracy': 90,
     'maxDamage': 6,
     'minDamage': 2,
     'defense': 10,
     'armor': 0,
-    'speed': 5
+    'speed': 5,
+    'deaths': 0
 }
 
+class DeadBody:
+
+    def __init__(self, killed):
+        self.name = killed.name + "'s mangled corpse"
+        if type(killed) == Player:
+            self.events = [{
+                "message": "the hollow eyes of the recently deceased " + self.name + " watch you still...",
+                "dest": {
+                    "type": "uuid",
+                    "value": killed.uuid
+                }
+            }]
+
+    def describe(self):
+        return self.name + " stares through the darkness into your soul."
+
+    def action_used(self, actor, current_room):
+        return []
+
+
+class Death:
+
+    def __init__(self, killed, attacker=None):
+        self.attacker = attacker
+        self.killed = killed
+
+    def get_msg(self):
+        msg = self.killed.name + " was killed"
+        if self.attacker is not None:
+            msg += " by " + self.attacker.name
+        return msg
+
+    def __str__(self):
+        return self.get_msg()
+
+    def __repr__(self):
+        return self.get_msg()
+
+    def try_adding_equipment(self, inv, slot_name):
+        if hasattr(self.killed, slot_name):
+            slot = getattr(self.killed, slot_name)
+            if slot is not None:
+                inv.add_item(slot)
+
+    def handle_death(self):
+        server = dungeon_server.Server()
+        x, y = server.map.findEntityByName(self.attacker.name)
+        current_room = server.map.get_room(x, y)
+
+        if hasattr(self.killed, "inventory"):
+            inv = self.killed.inventory
+        else:
+            inv = items.ItemContainer("dropped items")
+
+        self.try_adding_equipment(inv, "weapon")
+        self.try_adding_equipment(inv, "armor_equiped")
+        self.try_adding_equipment(inv, "accessory")
+
+        current_room.entities.remove(self.killed)
+        current_room.entities.append(DeadBody(self.killed))
+
+        events = []
+        events.append(self.base_event())
+        if not len(inv.items) == 0:
+            current_room.entities.append(inv)
+            events.append({
+                "message": self.killed.name + " dropped some items in the room.",
+                "dest": {
+                    "type": "room",
+                    "x": x,
+                    "y": y
+                }
+            })
+        if hasattr(self.killed, 'uuid'):
+            events.append(self.respawn_player())
+
+        return events
+
+    def base_event(self):
+        return {
+            "message": self.get_msg(),
+            "dest": {"type": "all"}
+        }
+
+    def respawn_player(self):
+        server = dungeon_server.Server()
+        n_deaths = self.killed.get_stat("deaths") + 1
+        server.register_new_player(self.killed.uuid, times_killed=n_deaths)
+        return {
+            "message": "you respawned as " + server.players[self.killed.uuid].name,
+            "dest": {
+                "type": "uuid",
+                "value": self.killed.uuid
+            }
+        }
 
 class Character:
 
@@ -70,6 +166,11 @@ class Character:
             dmg = randint(self.get_stat("minDamage"), self.get_stat(("maxDamage")))
             result["damage"] = target.deal_damage(dmg)
             result["hit"] = True
+            if target.wounds >= target.get_stat("maxHp"):
+                death = Death(target, attacker=self)
+                event = death.handle_death()
+                result["death"] = event
+
         else:
             result["damage"] = 0
             result["hit"] = False
@@ -78,9 +179,9 @@ class Character:
     def default_attack_events(self, target, result):
         if result["hit"]:
             final_dmg = result["damage"]
-            attacker_msg = "You hit " + target.name + " and dealt " + final_dmg + " damage."
-            target_msg = "You were hit by " + self.name + " and dealt " + final_dmg + " damage."
-            observer_msg = target.name + " was hit by " + self.name + " and dealt " + final_dmg + " damage."
+            attacker_msg = "You hit " + target.name + " and dealt " + str(final_dmg) + " damage."
+            target_msg = "You were hit by " + self.name + " and dealt " + str(final_dmg) + " damage."
+            observer_msg = target.name + " was hit by " + self.name + " and dealt " + str(final_dmg) + " damage."
         else:
             attacker_msg = target.name + "evaded your attack!"
             target_msg = "You evaded an attack from " + self.name
@@ -108,6 +209,9 @@ class Character:
                 }
             })
             exclude.append(target.uuid)
+        if "death" in result:
+            events += result['death']
+
         x, y = dungeon_server.Server().map.findEntityByName(self.name)
         events.append({
             "result": result,
@@ -141,7 +245,7 @@ class Player(Character):
         self.uuid = uuid
 
         self.weapon = None
-        self.armor_equiped = None
+        self.armor_equipped = None
         self.accessory = None
 
     def __repr__(self):
@@ -154,8 +258,8 @@ class Player(Character):
         value = self.stats[stat]
         if self.weapon is not None:
             value += self.weapon.get_stat(stat)
-        if self.armor_equiped is not None:
-            value += self.armor_equiped.get_stat(stat)
+        if self.armor_equipped is not None:
+            value += self.armor_equipped.get_stat(stat)
         if self.accessory is not None:
             value += self.accessory.get_stat(stat)
         return value
@@ -173,12 +277,7 @@ class Monster(Character):
         return self.display_stats()
 
     def action_used(self, actor, current_room):
-        print("TODO do something to the actor")
-        return [{
-            "message": "a scary monster is after you!",
-            "dest": {
-                "type": "uuid",
-                "value": actor.uuid
-            }
-        }]
+        result = self.attack(actor)
+        events = self.default_attack_events(actor, result)
+        return events
 
