@@ -141,20 +141,20 @@ class MoveCommand:
 
         return self.get_events(src, direction, old_addr, (x,y))
 
-    def get_events(self, uuid, move_direction, room_entered, room_exited):
+    def get_events(self, uuid, move_direction, room_exited_addr, room_entered_addr):
         player_name = dungeon_server.Server().players[uuid].name
 
-        return [{
+        events = [{
             "src": player_name,
             "name": "move",
-            "dest": {"type": "room", "x": room_entered[0], "y": room_entered[1]},
-            "message": player_name + " left the room to the " + move_direction + "."
+            "dest": {"type": "room", "x": room_entered_addr[0], "y": room_entered_addr[1]},
+            "message": "player " + player_name + " entered the room."
         },
         {
             "src": player_name,
             "name": "move",
-            "dest": {"type": "room", "exclude": [uuid], "x": room_exited[0], "y": room_exited[1]},
-            "message": "player " + player_name + " entered the room."
+            "dest": {"type": "room", "exclude": [uuid], "x": room_exited_addr[0], "y": room_exited_addr[1]},
+            "message": player_name + " left the room to the " + move_direction + "."
         },
         {
             "src": player_name,
@@ -163,6 +163,16 @@ class MoveCommand:
             "success": True,
             "message": "you moved to the " + move_direction
         }]
+
+        room_entered = dungeon_server.Server().map.get_room(room_entered_addr[0], room_entered_addr[1])
+        for entity in room_entered.entities:
+            if type(entity) == characters.Monster:
+                events.append({
+                    "message": "beware, a " + entity.name + " lurks in the room.",
+                    "dest": {"type": "uuid", "value": uuid}
+                })
+
+        return events
 
     def get_new_room_addr(self, x, y, direction):
         if direction == room.NORTH:

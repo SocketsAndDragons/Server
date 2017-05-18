@@ -26,20 +26,18 @@ class DeadBody:
 
     def __init__(self, killed):
         self.name = killed.name + "'s mangled corpse"
-        if type(killed) == Player:
-            self.events = [{
-                "message": "the hollow eyes of the recently deceased " + self.name + " watch you still...",
-                "dest": {
-                    "type": "uuid",
-                    "value": killed.uuid
-                }
-            }]
 
     def describe(self):
         return self.name + " stares through the darkness into your soul."
 
     def action_used(self, actor, current_room):
-        return []
+        return  [{
+            "message": "the hollow eyes of the recently deceased " + self.name + " watch you still...",
+            "dest": {
+                "type": "uuid",
+                "value": actor.uuid
+            }
+        }]
 
 
 class Death:

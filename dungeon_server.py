@@ -100,6 +100,21 @@ class Server:
             reply["message"] = "connected successfully"
             print("DEBUG: players:")
             print(self.players)
+
+            self.send_event({
+                "message": self.players[uuid].name + " has entered the dungeon.",
+                "dest": {
+                    "type": "all"
+                }
+            })
+
+            self.send_event({
+                "message": "welcome to the dungeon " + self.players[uuid].name,
+                "dest": {
+                    'type': "uuid",
+                    "value": uuid
+                }
+            })
             return reply
 
         def start_socket(self):
