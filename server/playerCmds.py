@@ -18,6 +18,44 @@ def encode_direction(direction):
     else:
         raise Exception("playerCmds.MoveCommand.encode_direction TODO make an error msg")
 
+class LookCommand:
+
+    def __init__(self, map):
+        self.map = map
+        self.short_help_msg = "Describes the room you're in."
+
+    def help(self):
+        shell.Shell().display(self.short_help_msg)
+
+    def execute(self, args, src):
+        player_name = src
+
+        x, y = self.map.findPlayerByUuid(src)
+
+        print("room -- (x:", x, 'y:', y, ')')
+        room = self.map.rooms[y][x]
+
+        message = "You look around the room.\n"
+        
+        players = []
+        for entity in room.entities:
+            if isinstance(entity, characters.Player):
+                players.append(entity.name)
+
+        if len(players) > 0:
+            player_string = ", ".join(players)
+            message += "You see " + player_string + "\n"
+        else:
+            message += "You see no other people."
+
+        return [{
+            "name": "looking",
+            "message": message,
+            "dest": {
+                "type": "uuid",
+                "value": src
+            }
+        }]
 
 def get_players_room(uuid):
     server = dungeon_server.Server()
@@ -422,25 +460,25 @@ class UseItemCommand:
         }]
 
 
-class LookCommand:
-
-    def help(self):
-        print("lists all entities in the room")
-
-    def execute(self, args, src):
-        player = dungeon_server.Server().players[src]
-        current_room = get_players_room(src)
-        msg = 'room:\n\t'
-        for entity in current_room.entities:
-            if entity.name == player.name:
-                continue
-            msg += entity.name
-            msg += '\n\t'
-
-        return [{
-            "message": msg,
-            "dest": {"type": "uuid", "value": src}
-        }]
+# class LookCommand:
+#
+#     def help(self):
+#         print("lists all entities in the room")
+#
+#     def execute(self, args, src):
+#         player = dungeon_server.Server().players[src]
+#         current_room = get_players_room(src)
+#         msg = 'room:\n\t'
+#         for entity in current_room.entities:
+#             if entity.name == player.name:
+#                 continue
+#             msg += entity.name
+#             msg += '\n\t'
+#
+#         return [{
+#             "message": msg,
+#             "dest": {"type": "uuid", "value": src}
+#         }]
 
 
 class StatsCommand:
