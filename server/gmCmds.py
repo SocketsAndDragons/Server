@@ -4,6 +4,7 @@ class MapCommand:
 
     def __init__(self, map, map_rules=None):
         self.map = map
+        self.short_help_msg = "Shows the map."
         if map_rules is not None:
             self.map_rules = map_rules
         else:
