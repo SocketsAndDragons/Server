@@ -33,6 +33,7 @@ server.cmds["give"] = playerCmds.GiveToCommand()
 server.cmds["use"] = playerCmds.UseItemCommand()
 server.cmds["stats"] = playerCmds.StatsCommand()
 server.cmds["help"] = playerCmds.HelpCommand()
+server.cmds["disconnect"] = playerCmds.DisconnectCommand()
 
 server.cmds["attack"] = combatCmds.AttackCommand()
 
