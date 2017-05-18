@@ -134,7 +134,7 @@ class Server:
                     msg = "command '"+cmd_name+"' not recognized"
                     self.send_error_event(msg, src)
             except Exception as e:
-                msg = "an error occurred executing the command" + cmd_name #, "with the arguments" + str(args)
+                msg = "an error occurred executing the command " + cmd_name #, "with the arguments" + str(args)
                 print(e)
                 print(msg)
                 self.send_error_event(msg, src)

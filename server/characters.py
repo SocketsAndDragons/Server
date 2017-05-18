@@ -1,4 +1,6 @@
 
+from server import items
+
 # STARTING_HP = 20
 # STARTING_ACC = 90
 # STARTING_MAX_DMG = 6
@@ -29,6 +31,7 @@ class Character:
                 starting_stats[stat] = BASE_STATS[stat]
 
         self.stats = starting_stats
+        self.inventory = items.ItemContainer(name + "-backpack")
 
     def get_stat(self, stat):
         return self.stats[stat]
@@ -67,6 +70,9 @@ class Player(Character):
 
     def __repr__(self):
         return self.name + "(player " + str(self.number) + ")"
+
+    def receive_item(self, item):
+        self.inventory.add_item(item)
 
     def get_stat(self, stat):
         value = self.stats[stat]

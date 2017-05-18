@@ -30,6 +30,8 @@ class RoomNameDestRule:
 class RoomDestRule:
 
     def get_targets(self, dest_obj):
+        print("dest:")
+        print(dest_obj)
         x = dest_obj['x']
         y = dest_obj['y']
         map = dungeon_server.Server().map
