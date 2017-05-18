@@ -343,6 +343,8 @@ class TakeFromCommand:
         item_name = " ".join(args[1:from_index])
         container_name = " ".join(args[from_index+1:])
 
+        success = False
+
         current_room = get_players_room(src)
         for entity in current_room.entities:
             if entity.name != container_name:
@@ -360,9 +362,16 @@ class TakeFromCommand:
             player = dungeon_server.Server().players[src]
             player.inventory.add_item(item)
             print("removal successful:", entity.remove_item(item))
+            success = True
             break
 
             # self.get_events(container_name, item_name, player)
+
+        if not success:
+            print("container didn't exist")
+            msg = "entity '" + container_name + "' does not exist"
+            dungeon_server.Server().send_error_event(msg, src)
+            return []
 
         x, y = dungeon_server.Server().map.findPlayerByUuid(src)
         return [{
