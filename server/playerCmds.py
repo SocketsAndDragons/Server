@@ -147,13 +147,13 @@ class MoveCommand:
         events = [{
             "src": player_name,
             "name": "move",
-            "dest": {"type": "room", "x": room_entered_addr[0], "y": room_entered_addr[1]},
+            "dest": {"type": "room", "exclude": [uuid], "x": room_entered_addr[0], "y": room_entered_addr[1]},
             "message": "player " + player_name + " entered the room."
         },
         {
             "src": player_name,
             "name": "move",
-            "dest": {"type": "room", "exclude": [uuid], "x": room_exited_addr[0], "y": room_exited_addr[1]},
+            "dest": {"type": "room", "x": room_exited_addr[0], "y": room_exited_addr[1]},
             "message": player_name + " left the room to the " + move_direction + "."
         },
         {

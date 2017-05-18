@@ -268,8 +268,10 @@ class Player(Character):
 
 class Monster(Character):
 
-    def __init__(self, name, **starting_stats):
+    def __init__(self, name, loot=None, **starting_stats):
         super(Monster, self).__init__(name, starting_stats)
+        if loot is not None:
+            self.inventory = loot
 
     def describe(self):
         return self.display_stats()

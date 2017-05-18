@@ -41,12 +41,18 @@ server.dest_rules["gm"] = destination.GmDestRule()
 server.dest_rules["all"] = destination.AllDestRule()
 server.dest_rules["name"] = destination.NameDestRule()
 
+scary_monster_loot = items.ItemContainer("loot", items.HealingPotion())
+
 rooms = server.map.rooms
 rooms[1][3].entities = [
         items.ItemContainer("chest", MockItem(), items.HealingPotion(), items.PoisonPotion()),
-        characters.Monster("scary monster", maxHp=5)
+        characters.Monster("scary monster", maxHp=5, loot=scary_monster_loot)
 ]
 
+very_scary = characters.Monster("very scary monster", maxHp = 30)
+rooms[0][0].entities = [very_scary]
+
+rooms[2][4].entities = [items.ItemContainer("big chest", items.VictoryItem("very shiney coin"))]
 
 server.start_socket()
 server.run()
