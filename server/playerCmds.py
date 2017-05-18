@@ -48,6 +48,15 @@ class LookCommand:
         else:
             message += "You see no other people."
 
+        if room.has_north_door():
+            message += "There is a door to the north\n"
+        if room.has_east_door():
+            message += "There is a door to the east\n"
+        if room.has_south_door():
+            message += "There is a door to the south\n"
+        if room.has_west_door():
+            message += "There is a door to the west\n"
+
         return [{
             "name": "looking",
             "message": message,
@@ -268,7 +277,7 @@ class ExamineEntityCommand:
             msg = "malformed examine command, try 'examine [thing]'"
             dungeon_server.Server().send_error_event(msg, src)
             return []
-        
+
         entity_name = args[1]
         current_room = get_players_room(src)
         for entity in current_room.entities:
