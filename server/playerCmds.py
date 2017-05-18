@@ -116,7 +116,7 @@ class MoveCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "Move to the room in the indicated direction."
-        self.action_cost = 1
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -142,35 +142,57 @@ class MoveCommand:
         return self.get_events(src, direction, old_addr, (x,y))
 
     def get_events(self, uuid, move_direction, room_exited_addr, room_entered_addr):
-        player_name = dungeon_server.Server().players[uuid].name
+        player = dungeon_server.Server().players[uuid]
+        room_entered = dungeon_server.Server().map.get_room(room_entered_addr[0], room_entered_addr[1])
+        room_exited = dungeon_server.Server().map.get_room(room_exited_addr[0], room_exited_addr[1])
 
-        events = [{
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "room", "exclude": [uuid], "x": room_entered_addr[0], "y": room_entered_addr[1]},
-            "message": "player " + player_name + " entered the room."
-        },
-        {
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "room", "x": room_exited_addr[0], "y": room_exited_addr[1]},
-            "message": player_name + " left the room to the " + move_direction + "."
-        },
-        {
-            "src": player_name,
+        events = []
+        for entity in room_entered.entities:
+            if not hasattr(entity, "on_enter"):
+                continue
+            if entity is player:
+                continue
+            events += entity.on_enter(player)
+
+        for entity in room_exited.entities:
+            if not hasattr(entity, "on_exit"):
+                continue
+            events += entity.on_exit(player)
+
+        events.append({
+            "src": player.name,
             "name": "move",
             "dest": {"type": "uuid", "value": uuid},
             "success": True,
             "message": "you moved to the " + move_direction
-        }]
+        })
 
-        room_entered = dungeon_server.Server().map.get_room(room_entered_addr[0], room_entered_addr[1])
-        for entity in room_entered.entities:
-            if type(entity) == characters.Monster:
-                events.append({
-                    "message": "beware, a " + entity.name + " lurks in the room.",
-                    "dest": {"type": "uuid", "value": uuid}
-                })
+        # events = [{
+        #     "src": player.name,
+        #     "name": "move",
+        #     "dest": {"type": "room", "exclude": [uuid], "x": room_entered_addr[0], "y": room_entered_addr[1]},
+        #     "message": "player " + player.name + " entered the room."
+        # },
+        # {
+        #     "src": player.name,
+        #     "name": "move",
+        #     "dest": {"type": "room", "x": room_exited_addr[0], "y": room_exited_addr[1]},
+        #     "message": player.name + " left the room to the " + move_direction + "."
+        # },
+        # {
+        #     "src": player.name,
+        #     "name": "move",
+        #     "dest": {"type": "uuid", "value": uuid},
+        #     "success": True,
+        #     "message": "you moved to the " + move_direction
+        # }]
+
+        # for entity in room_entered.entities:
+        #     if type(entity) == characters.Monster:
+        #         events.append({
+        #             "message": "beware, a " + entity.name + " lurks in the room.",
+        #             "dest": {"type": "uuid", "value": uuid}
+        #         })
 
         return events
 
