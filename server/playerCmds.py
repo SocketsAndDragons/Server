@@ -36,7 +36,7 @@ class LookCommand:
         room = self.map.rooms[y][x]
 
         message = "You look around the room.\n"
-        
+
         players = []
         for entity in room.entities:
             if isinstance(entity, characters.Player):
@@ -264,6 +264,11 @@ class ExamineEntityCommand:
         print("shows the type of the entity")
 
     def execute(self, args, src):
+        if len(args) != 2:
+            msg = "malformed examine command, try 'examine [thing]'"
+            dungeon_server.Server().send_error_event(msg, src)
+            return []
+        
         entity_name = args[1]
         current_room = get_players_room(src)
         for entity in current_room.entities:
