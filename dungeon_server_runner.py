@@ -26,7 +26,6 @@ server.cmds["take"] = playerCmds.TakeFromCommand()
 server.cmds["give"] = playerCmds.GiveToCommand()
 server.cmds["use"] = playerCmds.UseItemCommand()
 server.cmds["stats"] = playerCmds.StatsCommand()
-server.cmds["look"] = playerCmds.LookCommand()
 
 server.dest_rules["uuid"] = destination.UuidDestRule()
 server.dest_rules["room"] = destination.RoomDestRule()

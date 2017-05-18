@@ -38,15 +38,28 @@ class LookCommand:
         message = "You look around the room.\n"
         
         players = []
+        others = []
         for entity in room.entities:
             if isinstance(entity, characters.Player):
                 players.append(entity.name)
+            else:
+                others.append(entity.name)
+
+        player = dungeon_server.Server().players[src]
+        players.remove(player.name)
 
         if len(players) > 0:
             player_string = ", ".join(players)
             message += "You see " + player_string + "\n"
         else:
-            message += "You see no other people."
+            message += "You see no other people.\n"
+
+
+        if len(others) > 0:
+            message += "You see a " + ", a ".join(others) + "\n"
+        else:
+            message += "You see no other features.\n"
+
 
         return [{
             "name": "looking",

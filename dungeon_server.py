@@ -40,6 +40,8 @@ class Server:
             self.cmds = {}
             self.monsters = []
 
+            self.action_points = 0
+
             self.dest_rules = {}
 
         def accept_new_client(self, client):
@@ -124,15 +126,15 @@ class Server:
 
         def execute(self, cmd_name, args, src):
             try:
-                if cmd_name in self.cmds:
-                    cmd = self.cmds[cmd_name]
-                    events = cmd.execute(args, src)
-                    for event in events:
-                        self.send_event(event)
-
-                else:
+                if cmd_name not in self.cmds:
                     msg = "command '"+cmd_name+"' not recognized"
                     self.send_error_event(msg, src)
+
+                cmd = self.cmds[cmd_name]
+                events = cmd.execute(args, src)
+                for event in events:
+                    self.send_event(event)
+
             except Exception as e:
                 msg = "an error occurred executing the command " + cmd_name #, "with the arguments" + str(args)
                 print(e)

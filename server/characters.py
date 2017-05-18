@@ -96,3 +96,6 @@ class Monster(Character):
     def describe(self):
         return "it's a " + self.name
 
+    def action_used(self, actor):
+        print("do something to the actor")
+
