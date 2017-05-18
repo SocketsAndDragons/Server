@@ -18,6 +18,32 @@ def encode_direction(direction):
     else:
         raise Exception("playerCmds.MoveCommand.encode_direction TODO make an error msg")
 
+class HelpCommand:
+
+    def __init__(self):
+        self.short_help_msg = "I NEEEEEEEEEEED A MEDIC BAG"
+
+    def help(self):
+        print(self.short_help_msg)
+
+    def execute(self, args, src):
+        player_name = src
+
+        server = dungeon_server.Server()
+
+        message = ""
+        for key in server.cmds.keys():
+            message += key + ": " + server.cmds[key].short_help_msg + "\n"
+
+        return [{
+            "name": "help",
+            "message": message,
+            "dest": {
+                "type": "uuid",
+                "value": src
+            }
+        }]
+
 class LookCommand:
 
     def __init__(self, map):
@@ -279,6 +305,9 @@ class WhisperCommand:
 
 class ExamineEntityCommand:
 
+    def __init__(self):
+        self.short_help_msg = "shows the type of the entity"
+
     def help(self):
         print("shows the type of the entity")
 
@@ -315,6 +344,8 @@ class ExamineEntityCommand:
 
 class InvCommand:
 
+    def __init__(self):
+        self.short_help_msg = "displays all the items in the player's inventory"
     def help(self):
         print("displays all the items in the player's inventory")
 
@@ -339,7 +370,7 @@ class InvCommand:
 class TakeFromCommand:
 
     def __init__(self):
-        pass
+        self.short_help_msg = "take an item from a container and place it in the character's inventory"
 
     def help(self):
         print("take an item from a container and place it in the character's inventory")
@@ -404,6 +435,7 @@ class TakeFromCommand:
 class GiveToCommand:
 
     def __init__(self):
+        self.short_help_msg = "Give an item to someone"
         pass
 
     def help(self):
