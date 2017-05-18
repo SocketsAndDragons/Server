@@ -200,9 +200,7 @@ class SayCommand:
         player_name = dungeon_server.Server().players[src].name
         message = player_name + " says \"" + self.get_message(args) + "\""
 
-        current_room = 'd2'
-        x = 3
-        y = 1
+        x, y = self.map.findPlayerByUuid(src)
         return [{
             "src": player_name,
             "name": "say",
