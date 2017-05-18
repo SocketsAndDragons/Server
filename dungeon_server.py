@@ -77,7 +77,7 @@ class Server:
                     print(cmd_sender, " did something")
                     self.execute(cmd_name, cmd, cmd_sender)
                 except queue.Empty:
-                    time.sleep(1)
+                    time.sleep(0.01)
 
         def register_new_player(self, uuid, name=None):
             print("registering new player")

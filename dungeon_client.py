@@ -18,13 +18,13 @@ def game_loop(sock,inputs,resps):
 			print("Received: ")
 			print(item[1]["message"])
 		except queue.Empty:
-			time.sleep(0.1)
+			time.sleep(0.01)
 		# Handle inputs
 		try:
 			item = inputs.get(block=False)
 			dragon.stream_send_dict(sock,item)
 		except queue.Empty:
-			time.sleep(0.1)
+			time.sleep(0.01)
 
 print("Welcome to die")
 

@@ -18,6 +18,7 @@ def encode_direction(direction):
     else:
         raise Exception("playerCmds.MoveCommand.encode_direction TODO make an error msg")
 
+
 class LookCommand:
 
     def __init__(self, map):
@@ -36,31 +37,38 @@ class LookCommand:
         room = self.map.rooms[y][x]
 
         message = "You look around the room.\n"
-        
+
         players = []
-        others = []
+        things = []
         for entity in room.entities:
             if isinstance(entity, characters.Player):
-                players.append(entity.name)
+                if entity.uuid != src:
+                    players.append(entity.name)
             else:
-                others.append(entity.name)
-
-        player = dungeon_server.Server().players[src]
-        players.remove(player.name)
+                things.append(entity.name)
 
         if len(players) > 0:
-            player_string = ".\nYou see ".join(players)
-            message += "You see " + player_string + ".\n"
+            player_string = ", ".join(players)
+            message += + player_string + " are in the room.\n"
         else:
             message += "You see no other people.\n"
 
-
-        if len(others) > 0:
-            message += "You see a " + ".\nYou see a ".join(others) + ".\n"
+        if len(things) > 0:
+            thing_string = ".\nYou see a ".join(things)
+            message += "You see a " + thing_string + "\n"
         else:
-            message += "You see no other features.\n"
+            message += "There is nothing here.\n"
 
+        if room.has_north_door():
+            message += "There is a door to the north\n"
+        if room.has_east_door():
+            message += "There is a door to the east\n"
+        if room.has_south_door():
+            message += "There is a door to the south\n"
+        if room.has_west_door():
+            message += "There is a door to the west\n"
 
+        message += "It is very dark. You will like be eaten by a grue.\n"
         return [{
             "name": "looking",
             "message": message,
@@ -192,9 +200,7 @@ class SayCommand:
         player_name = dungeon_server.Server().players[src].name
         message = player_name + " says \"" + self.get_message(args) + "\""
 
-        current_room = 'd2'
-        x = 3
-        y = 1
+        x, y = self.map.findPlayerByUuid(src)
         return [{
             "src": player_name,
             "name": "say",
@@ -278,6 +284,11 @@ class ExamineEntityCommand:
 
     def execute(self, args, src):
         entity_name = " ".join(args[1:])
+        if len(args) < 2:
+            msg = "malformed examine command, try 'examine [thing]'"
+            dungeon_server.Server().send_error_event(msg, src)
+            return []
+
         current_room = get_players_room(src)
         for entity in current_room.entities:
             if entity.name == entity_name:
@@ -342,6 +353,8 @@ class TakeFromCommand:
         item_name = " ".join(args[1:from_index])
         container_name = " ".join(args[from_index+1:])
 
+        success = False
+
         current_room = get_players_room(src)
         for entity in current_room.entities:
             if entity.name != container_name:
@@ -359,9 +372,16 @@ class TakeFromCommand:
             player = dungeon_server.Server().players[src]
             player.inventory.add_item(item)
             print("removal successful:", entity.remove_item(item))
+            success = True
             break
 
             # self.get_events(container_name, item_name, player)
+
+        if not success:
+            print("container didn't exist")
+            msg = "entity '" + container_name + "' does not exist"
+            dungeon_server.Server().send_error_event(msg, src)
+            return []
 
         x, y = dungeon_server.Server().map.findPlayerByUuid(src)
         return [{
