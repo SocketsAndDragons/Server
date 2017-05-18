@@ -1,5 +1,7 @@
 
+import dungeon_server
 from server import items
+from random import randint
 
 # STARTING_HP = 20
 # STARTING_ACC = 90
@@ -48,15 +50,76 @@ class Character:
     def deal_damage(self, damage):
         total_damage = damage - self.get_stat('armor')
         print("DEBUG: ", self.get_stat('armor'))
-        if total_damage < 0: return False
+        if total_damage < 0: return 0
         self.wounds += total_damage
-        return True
+        return total_damage
 
     def get_hp_left(self):
         return self.get_stat('maxHp') - self.wounds
 
     def action_used(self, actor, current_room):
         return []
+
+    def attack(self, target):
+        defense = target.get_stat("defense")
+        acc = self.get_stat("accuracy")
+        effectve_acc = acc - defense
+        result = {}
+        rn = randint(1, 100)
+        if rn == 1 or rn <= effectve_acc:
+            dmg = randint(self.get_stat("minDamage"), self.get_stat(("maxDamage")))
+            result["damage"] = target.deal_damage(dmg)
+            result["hit"] = True
+        else:
+            result["damage"] = 0
+            result["hit"] = False
+        return result
+
+    def default_attack_events(self, target, result):
+        if result["hit"]:
+            final_dmg = result["damage"]
+            attacker_msg = "You hit " + target.name + " and dealt " + final_dmg + " damage."
+            target_msg = "You were hit by " + self.name + " and dealt " + final_dmg + " damage."
+            observer_msg = target.name + " was hit by " + self.name + " and dealt " + final_dmg + " damage."
+        else:
+            attacker_msg = target.name + "evaded your attack!"
+            target_msg = "You evaded an attack from " + self.name
+            observer_msg = target.name + " evaded an attack from " + self.name
+
+        events = []
+        exclude = []
+        if hasattr(self, "uuid"):
+            events.append({
+                "result": result,
+                "message": attacker_msg,
+                "dest": {
+                    "type": 'uuid',
+                    "value": self.uuid
+                }
+            })
+            exclude.append(self.uuid)
+        if hasattr(target, "uuid"):
+            events.append({
+                "result": result,
+                "message": target_msg,
+                "dest": {
+                    "type": "uuid",
+                    "value": target.uuid
+                }
+            })
+            exclude.append(target.uuid)
+        x, y = dungeon_server.Server().map.findEntityByName(self.name)
+        events.append({
+            "result": result,
+            "message": observer_msg,
+            "dest": {
+                "type": 'room',
+                "x": x,
+                "y": y,
+                "exclude": exclude
+            }
+        })
+        return events
 
     def display_stats(self):
         msg = self.name + ':\n\t'
