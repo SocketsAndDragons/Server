@@ -38,15 +38,26 @@ class LookCommand:
         message = "You look around the room.\n"
 
         players = []
+        things = []
+
         for entity in room.entities:
             if isinstance(entity, characters.Player):
-                players.append(entity.name)
+                if entity.uuid != src:
+                    players.append(entity.name)
+            else:
+                things.append(entity.name)
 
         if len(players) > 0:
             player_string = ", ".join(players)
             message += "You see " + player_string + "\n"
         else:
-            message += "You see no other people."
+            message += "You see no other people.\n"
+
+        if len(things) > 0:
+            thing_string = ", ".join(things)
+            message += "You see " + thing_string + "\n"
+        else:
+            message += "You see no other things.\n"
 
         if room.has_north_door():
             message += "There is a door to the north\n"
@@ -57,6 +68,7 @@ class LookCommand:
         if room.has_west_door():
             message += "There is a door to the west\n"
 
+        message += "It is very dark. You will like be eaten by a grue.\n"
         return [{
             "name": "looking",
             "message": message,
