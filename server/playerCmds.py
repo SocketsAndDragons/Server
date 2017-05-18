@@ -586,3 +586,32 @@ class StatsCommand:
             "message": msg,
             "dest": {"type": "uuid", "value": src}
         }]
+
+class DisconnectCommand:
+
+    def __init__(self):
+        pass
+
+    def help(self):
+        return "disconencts the client"
+
+    def execute(self, args, src):
+        server = dungeon_server.Server()
+        player = server.players[src]
+        x, y = server.map.findPlayerByUuid(src)
+        current_room = server.map.get_room(x, y)
+        current_room.entities.remove(player)
+
+        del server.players[src]
+        del server.threads[src]
+        del server.clients[src]
+
+        return [{
+            "message": player.name + " has vanished in a poof of smoke!",
+            "dest": {
+                "type": "room",
+                "x": x,
+                "y": y
+            }
+        }]
+

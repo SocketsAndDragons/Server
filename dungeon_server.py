@@ -36,7 +36,7 @@ class Server:
 
             self.map = dungeon_map.Map(width, height)
             self.players = {}
-            self.connections = {}
+            # self.connections = {}
             self.cmds = {}
             self.monsters = []
 
@@ -144,6 +144,8 @@ class Server:
 
         def execute(self, cmd_name, args, src):
             try:
+                print("DEBUG:")
+                print(cmd_name)
                 if cmd_name not in self.cmds:
                     msg = "command '"+cmd_name+"' not recognized"
                     self.send_error_event(msg, src)
