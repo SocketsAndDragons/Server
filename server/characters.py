@@ -56,7 +56,7 @@ class Character:
         return self.get_stat('maxHp') - self.wounds
 
     def action_used(self, actor, current_room):
-        pass
+        return []
 
     def display_stats(self):
         msg = self.name + ':\n\t'
@@ -111,4 +111,11 @@ class Monster(Character):
 
     def action_used(self, actor, current_room):
         print("TODO do something to the actor")
+        return [{
+            "message": "a scary monster is after you!",
+            "dest": {
+                "type": "uuid",
+                "value": actor.uuid
+            }
+        }]
 

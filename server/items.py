@@ -86,7 +86,7 @@ class ItemContainer:
         return False
 
     def action_used(self, actor, current_room):
-        pass
+        return []
 
 
 class Item:

@@ -24,6 +24,7 @@ class LookCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "Describes the room you're in."
+        self.action_cost = 0
 
     def help(self):
         shell.Shell().display(self.short_help_msg)
@@ -78,6 +79,7 @@ class LookCommand:
             }
         }]
 
+
 def get_players_room(uuid):
     server = dungeon_server.Server()
     x, y = server.map.findPlayerByUuid(uuid)
@@ -89,6 +91,7 @@ class MoveCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "Move to the room in the indicated direction."
+        self.action_cost = 1
 
     def help(self):
         print(self.short_help_msg)
@@ -171,6 +174,7 @@ class PingCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "is the server alive?"
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -192,6 +196,7 @@ class SayCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "say something to other players in the same room. This does not cost an action."
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -217,6 +222,7 @@ class ShoutCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "say something to other players in the same room. This does not cost an action."
+        self.action_cost = 1
 
     def help(self):
         print(self.short_help_msg)
@@ -241,6 +247,7 @@ class WhisperCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "say something to other players in the same room. This does not cost an action."
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -279,6 +286,9 @@ class WhisperCommand:
 
 class ExamineEntityCommand:
 
+    def __init__(self):
+        self.action_cost = 0
+
     def help(self):
         print("shows the type of the entity")
 
@@ -315,6 +325,9 @@ class ExamineEntityCommand:
 
 class InvCommand:
 
+    def __init__(self):
+        self.action_cost = 0
+
     def help(self):
         print("displays all the items in the player's inventory")
 
@@ -339,7 +352,7 @@ class InvCommand:
 class TakeFromCommand:
 
     def __init__(self):
-        pass
+        self.action_cost = 1
 
     def help(self):
         print("take an item from a container and place it in the character's inventory")
@@ -404,7 +417,7 @@ class TakeFromCommand:
 class GiveToCommand:
 
     def __init__(self):
-        pass
+        self.action_cost = 1
 
     def help(self):
         print("give an item from your inventory to the designated entity")
@@ -462,6 +475,7 @@ class UseItemCommand:
 
     def __init__(self):
         self.short_help_msg = "uses an item from the player's inventory"
+        self.action_cost = 1
 
     def help(self):
         print(self.short_help_msg)
@@ -493,31 +507,11 @@ class UseItemCommand:
         }]
 
 
-# class LookCommand:
-#
-#     def help(self):
-#         print("lists all entities in the room")
-#
-#     def execute(self, args, src):
-#         player = dungeon_server.Server().players[src]
-#         current_room = get_players_room(src)
-#         msg = 'room:\n\t'
-#         for entity in current_room.entities:
-#             if entity.name == player.name:
-#                 continue
-#             msg += entity.name
-#             msg += '\n\t'
-#
-#         return [{
-#             "message": msg,
-#             "dest": {"type": "uuid", "value": src}
-#         }]
-
-
 class StatsCommand:
 
     def __init__(self):
         self.short_help_msg = "uses an item from the player's inventory"
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)

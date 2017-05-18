@@ -153,13 +153,19 @@ class Server:
                 return
             self.action_points += action_cost
             player = self.players[src]
-            current_room = self.map.findPlayerByUuid(src)
-            for entity in current_room:
+            x, y = self.map.findPlayerByUuid(src)
+            current_room = self.map.get_room(x, y)
+            for entity in current_room.entities:
                 if entity is player: continue
-                # if not hasattr(entity, "action_used"): continue
+                if not hasattr(entity, "action_used"):
+                    print("missing action_used:")
+                    print(entity)
+                    continue
                 # this shouldn't be necessary, I added .action_used to all entity classes.
 
-                entity.action_used(player, current_room)
+                events = entity.action_used(player, current_room)
+                for event in events:
+                    self.send_event(event)
 
         def send_event(self, event):
             print('sending event:', event)
