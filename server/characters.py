@@ -55,6 +55,19 @@ class Character:
     def get_hp_left(self):
         return self.get_stat('maxHp') - self.wounds
 
+    def action_used(self, actor, current_room):
+        pass
+
+    def display_stats(self):
+        msg = self.name + ':\n\t'
+        msg += "HP: " + str(self.get_stat("maxHp") - self.wounds) + ' / ' + str(self.get_stat("maxHp"))
+        msg += '\n\t'
+        for stat in self.stats:
+            msg += stat + ': '
+            msg += str(self.stats[stat])
+            msg += '\n\t'
+        return msg
+
 
 class Player(Character):
 
@@ -91,11 +104,11 @@ class Player(Character):
 class Monster(Character):
 
     def __init__(self, name, **starting_stats):
-        super(Player, self).__init__(name, starting_stats)
+        super(Monster, self).__init__(name, starting_stats)
 
     def describe(self):
-        return "it's a " + self.name
+        return self.display_stats()
 
-    def action_used(self, actor):
-        print("do something to the actor")
+    def action_used(self, actor, current_room):
+        print("TODO do something to the actor")
 

@@ -131,6 +131,12 @@ class Server:
                     self.send_error_event(msg, src)
 
                 cmd = self.cmds[cmd_name]
+                if hasattr(cmd, 'action_cost'):
+                    action_cost = cmd.action_cost
+                else:
+                    action_cost = 0
+                self.resolve_action_points(action_cost, src)
+
                 events = cmd.execute(args, src)
                 for event in events:
                     self.send_event(event)
@@ -141,6 +147,19 @@ class Server:
                 print(msg)
                 self.send_error_event(msg, src)
                 raise e
+
+        def resolve_action_points(self, action_cost, src):
+            if action_cost <= 0:
+                return
+            self.action_points += action_cost
+            player = self.players[src]
+            current_room = self.map.findPlayerByUuid(src)
+            for entity in current_room:
+                if entity is player: continue
+                # if not hasattr(entity, "action_used"): continue
+                # this shouldn't be necessary, I added .action_used to all entity classes.
+
+                entity.action_used(player, current_room)
 
         def send_event(self, event):
             print('sending event:', event)

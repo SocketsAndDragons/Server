@@ -49,14 +49,14 @@ class LookCommand:
         players.remove(player.name)
 
         if len(players) > 0:
-            player_string = ", ".join(players)
-            message += "You see " + player_string + "\n"
+            player_string = ".\nYou see ".join(players)
+            message += "You see " + player_string + ".\n"
         else:
             message += "You see no other people.\n"
 
 
         if len(others) > 0:
-            message += "You see a " + ", a ".join(others) + "\n"
+            message += "You see a " + ".\nYou see a ".join(others) + ".\n"
         else:
             message += "You see no other features.\n"
 
@@ -277,7 +277,7 @@ class ExamineEntityCommand:
         print("shows the type of the entity")
 
     def execute(self, args, src):
-        entity_name = args[1]
+        entity_name = " ".join(args[1:])
         current_room = get_players_room(src)
         for entity in current_room.entities:
             if entity.name == entity_name:
@@ -505,13 +505,7 @@ class StatsCommand:
     def execute(self, args, src):
         server = dungeon_server.Server()
         player = server.players[src]
-        msg = player.name + ':\n\t'
-        msg += "HP: " + str(player.get_stat("maxHp") - player.wounds) + ' / ' + str(player.get_stat("maxHp"))
-        msg += '\n\t'
-        for stat in player.stats:
-            msg += stat + ': '
-            msg += str(player.stats[stat])
-            msg += '\n\t'
+        msg = player.display_stats()
 
         return [{
             "message": msg,

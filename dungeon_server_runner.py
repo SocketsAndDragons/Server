@@ -5,10 +5,13 @@ from server import playerCmds
 import destination
 from server import gmCmds
 from server import items
+from server import characters
 
 class MockItem:
     def __init__(self):
         self.name = "mock item"
+
+
 
 
 server = dungeon_server.Server()
@@ -34,7 +37,10 @@ server.dest_rules["all"] = destination.AllDestRule()
 server.dest_rules["name"] = destination.NameDestRule()
 
 rooms = server.map.rooms
-rooms[1][3].entities = [items.ItemContainer("chest", MockItem(), items.HealingPotion(), items.PoisonPotion())]
+rooms[1][3].entities = [
+        items.ItemContainer("chest", MockItem(), items.HealingPotion(), items.PoisonPotion()),
+        characters.Monster("scary monster")
+]
 
 
 server.start_socket()
