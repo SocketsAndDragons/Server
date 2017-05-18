@@ -233,6 +233,12 @@ class Character:
             msg += '\n\t'
         return msg
 
+    def on_enter(self, player):
+        return []
+
+    def on_exit(self, player):
+        return []
+
 
 class Player(Character):
 
@@ -265,6 +271,24 @@ class Player(Character):
     def describe(self):
         return "it's " + self.name
 
+    def on_enter(self, player):
+        return [{
+            "message": player.name + " has entered the room.",
+            "dest": {
+                "type": "uuid",
+                "value": self.uuid
+            }
+        }]
+
+    def on_exit(self, player):
+        return [{
+            "message": player.name + " has left the room.",
+            "dest": {
+                "type": "uuid",
+                "value": self.uuid
+            }
+        }]
+
 
 class Monster(Character):
 
@@ -280,4 +304,16 @@ class Monster(Character):
         result = self.attack(actor)
         events = self.default_attack_events(actor, result)
         return events
+
+    def on_enter(self, player):
+        return [{
+            "message": "beware, a " + self.name + " lurks in the room.",
+            "dest": {"type": "uuid", "value": player.uuid}
+        }]
+
+    def on_exit(self, player):
+        result = self.attack(player)
+        events = self.default_attack_events(player, result)
+        return events
+
 
