@@ -1,3 +1,4 @@
+import dungeon_server
 
 
 BASE_STATS = {
@@ -52,7 +53,12 @@ class ItemContainer:
         return len(self.items)
 
     def describe(self):
-        msg = self.name
+        msg = self.name + "("
+        if len(self.items) == 0:
+            msg += "empty)\n\tthere is nothing here."
+        else:
+            msg += str(len(self.items)) + " items)"
+
         for item in self.items:
             msg += "\n\t" + item.name
         return msg
@@ -84,6 +90,9 @@ class ItemContainer:
             if item.name == name:
                 return True
         return False
+
+    def action_used(self, actor, current_room):
+        return []
 
 
 class Item:
@@ -121,4 +130,26 @@ class PoisonPotion(Item):
         player.deal_damage(10)
         damage_dealt = player.wounds-initWounds
         return "you suffered " + str(damage_dealt) + " damage"
+
+
+class VictoryItem(Item):
+
+    def __init__(self, name):
+        super(VictoryItem, self).__init__(name, False, "it lets you win the game")
+
+    def use(self, player):
+        server = dungeon_server.Server()
+        x, y = server.map.findPlayerByUuid(player.uuid)
+        if server.map.at_spawn((x,y)):
+            server.send_event({
+                "message": player.name + " has won has escaped with the " + self.name + " and won!!",
+                "dest": {
+                    "type": "all",
+                    "exclude": [player.uuid]
+                }
+            })
+            return "you have won!"
+        else:
+            return "you need to be at the entrance to win!"
+
 

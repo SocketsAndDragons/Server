@@ -40,6 +40,8 @@ class Server:
             self.cmds = {}
             self.monsters = []
 
+            self.action_points = 0
+
             self.dest_rules = {}
 
         def accept_new_client(self, client):
@@ -68,7 +70,8 @@ class Server:
                     item = self.cmds_received.get(block=False)
                     print('item:')
                     print(item)
-                    # (id, action)
+                    if item == '':
+                        continue
                     cmd_sender = item[0]
                     cmd = item[1]
                     cmd_name = cmd[0]
@@ -77,13 +80,13 @@ class Server:
                 except queue.Empty:
                     time.sleep(0.01)
 
-        def register_new_player(self, uuid, name=None):
+        def register_new_player(self, uuid, name=None, times_killed=0):
             print("registering new player")
             player_number = self.next_new_player_number
             self.next_new_player_number += 1
             if name is None:
                 name = 'player' + str(player_number)
-            self.players[uuid] = characters.Player(player_number, name, uuid)
+            self.players[uuid] = characters.Player(player_number, name, uuid, deaths=times_killed)
             print(type(self.players[uuid]))
             print(self.players[uuid].name, "added to the game")
             self.map.add_new_player(self.players[uuid])
@@ -95,6 +98,23 @@ class Server:
             reply["number"] = player_number
             reply["type"] = "player"
             reply["message"] = "connected successfully"
+            print("DEBUG: players:")
+            print(self.players)
+
+            self.send_event({
+                "message": self.players[uuid].name + " has entered the dungeon.",
+                "dest": {
+                    "type": "all"
+                }
+            })
+
+            self.send_event({
+                "message": "welcome to the dungeon " + self.players[uuid].name,
+                "dest": {
+                    'type': "uuid",
+                    "value": uuid
+                }
+            })
             return reply
 
         def start_socket(self):
@@ -124,21 +144,47 @@ class Server:
 
         def execute(self, cmd_name, args, src):
             try:
-                if cmd_name in self.cmds:
-                    cmd = self.cmds[cmd_name]
-                    events = cmd.execute(args, src)
-                    for event in events:
-                        self.send_event(event)
-
-                else:
+                if cmd_name not in self.cmds:
                     msg = "command '"+cmd_name+"' not recognized"
                     self.send_error_event(msg, src)
+
+                cmd = self.cmds[cmd_name]
+                if hasattr(cmd, 'action_cost'):
+                    action_cost = cmd.action_cost
+                else:
+                    action_cost = 0
+                self.resolve_action_points(action_cost, src)
+
+                events = cmd.execute(args, src)
+                for event in events:
+                    self.send_event(event)
+
             except Exception as e:
                 msg = "an error occurred executing the command " + cmd_name #, "with the arguments" + str(args)
                 print(e)
                 print(msg)
                 self.send_error_event(msg, src)
                 raise e
+
+        def resolve_action_points(self, action_cost, src):
+            if action_cost <= 0:
+                return
+            self.action_points += action_cost
+            player = self.players[src]
+            x, y = self.map.findPlayerByUuid(src)
+            current_room = self.map.get_room(x, y)
+            for entity in current_room.entities:
+                if entity is player: continue
+                if not hasattr(entity, "action_used"):
+                    print("missing action_used:")
+                    print(entity)
+                    continue
+                # this shouldn't be necessary, I added .action_used to all entity classes.
+
+                events = entity.action_used(player, current_room)
+                for event in events:
+                    pass
+                    self.send_event(event)
 
         def send_event(self, event):
             print('sending event:', event)

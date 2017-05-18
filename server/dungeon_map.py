@@ -34,6 +34,13 @@ class Map():
 
         return rooms
 
+    def at_spawn(self, entity):
+        if type(entity) == tuple:
+            return entity[0] == self.player_spawn[0] and entity[1] == self.player_spawn[1]
+
+        x, y = self.findEntityByName(entity.name)
+        return x == self.player_spawn[0] and y == self.player_spawn[1]
+
     def add_new_player(self, new_player):
         x, y = self.player_spawn
         room = self.get_room(x, y)
@@ -69,3 +76,4 @@ class Map():
         player = dungeon_server.Server().players[uuid]
         name = player.name
         return self.findEntityByName(name)
+
