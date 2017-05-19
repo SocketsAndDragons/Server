@@ -4,6 +4,8 @@ from server import characters
 from server import items
 from server import dungeon_map
 import dungeon_server
+import random
+
 
 def encode_direction(direction):
     dir = direction.lower()
@@ -104,7 +106,7 @@ class LookCommand:
 
         message += door_str + '\n'
 
-        message += "It is very dark. You will like be eaten by a grue.\n"
+        message += "It is very dark. You will likely be eaten by a grue.\n"
         return [{
             "name": "looking",
             "message": message,
