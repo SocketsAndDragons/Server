@@ -9,23 +9,30 @@ import time
 import json
 
 THREADS = []
-USERNAME = "some jerk"
+USERNAME = None
+SHARED = {"username": None}
 
 
 def prompt():
-	return "dungeon client >>> " # + USERNAME + " >>> "
+	username = SHARED["username"]
+	if username is None:
+		return ''
+	return "dungeon-client " + username + " >>> "
 
 
 def game_loop(sock,inputs,resps):
 	print_prompt = False
+	username = None
 	while True:
 		# Handle server messages
 		try:
 			item = resps.get(block=False)
 			print()
 			if "event" in item[1]:
-				if item[1]["event"] == "connect" and "name" in item[1]["name"]:
-					USERNAME = item[1]["name"]
+				# print("DEBUG:")
+				# print(item[1])
+				if item[1]["event"] == "connect" and "name" in item[1]:
+					SHARED["username"] = item[1]["name"]
 			if "message" in item[1]:
 				sys.stdout.write(item[1]["message"])
 				sys.stdout.write("\n")
