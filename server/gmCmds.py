@@ -1,15 +1,19 @@
 from server import characters
 import dungeon_server
-
+from server.characters import Death
 class NukeCommand:
 	def __init__(self):
 		self.short_help_msg = "nuculur bomb"
 
 	def execute(self, args, src):
-		for entity in dungeon_server.Server().players:
-			print(entity, " died of asbestos")
-		return []
-		
+		server = dungeon_server.Server()
+		nuker = server.players[src]
+		events = []
+		for entity in dungeon_server.Server().players.values():
+			death = Death(entity, attacker=nuker)
+			events += death.handle_death()
+		return events
+
 class MapCommand:
 
     def __init__(self, map, map_rules=None):
