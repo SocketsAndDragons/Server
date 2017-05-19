@@ -9,16 +9,37 @@ import time
 import json
 
 THREADS = []
+USERNAME = "some jerk"
+
+
+def prompt():
+	return "dungeon client >>> " # + USERNAME + " >>> "
+
 
 def game_loop(sock,inputs,resps):
+	print_prompt = False
 	while True:
 		# Handle server messages
 		try:
 			item = resps.get(block=False)
-			print("Received: ")
-			print(item[1]["message"])
+			print()
+			if "event" in item[1]:
+				if item[1]["event"] == "connect" and "name" in item[1]["name"]:
+					USERNAME = item[1]["name"]
+			if "message" in item[1]:
+				sys.stdout.write(item[1]["message"])
+				sys.stdout.write("\n")
+				# sys.stdout.write(prompt())
+				# sys.stdout.flush()
+				print_prompt = True
+
 		except queue.Empty:
-			time.sleep(0.01)
+			time.sleep(0.1)
+			if print_prompt:
+				sys.stdout.write(prompt())
+				sys.stdout.flush()
+				print_prompt = False
+
 		# Handle inputs
 		try:
 			item = inputs.get(block=False)
@@ -26,12 +47,14 @@ def game_loop(sock,inputs,resps):
 		except queue.Empty:
 			time.sleep(0.01)
 
-print("Welcome to die")
-
 hostport = input("Enter the hostname and port of the server (hostname:port) ===>>  ").split(":")
 
-host = hostport[0]
-port = hostport[1]
+try:
+	host = hostport[0]
+	port = hostport[1]
+except:
+	print("invalid path entered!")
+	sys.exit(-1)
 
 try:
 	print("\n\n\n")
@@ -51,15 +74,19 @@ try:
 	thread = threading.Thread(target=game_loop,name="Input",args = [s,inputs,resps])
 	thread.start()
 	THREADS.append(thread)
-
-	while True:
-		cmd = input("Gimme something to do ===>>  ")
-		if cmd.startswith('..'):
-			sys.exit(0)
-
-		act = cmd.split()
-		inputs.put(act)
 except:
 	print("Failed to connect! You died")
+
+try:
+	while True:
+		cmd = input(prompt())
+		act = cmd.split()
+		inputs.put(act)
+
+		if cmd.startswith('disconnect '):
+			print("disconnecting!")
+			sys.exit(0)
+except:
+	print("connection lost!! :(")
 finally:
 	sys.exit(1)
