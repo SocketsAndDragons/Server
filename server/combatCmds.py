@@ -1,6 +1,6 @@
 
 import dungeon_server
-
+from server import characters
 
 class AttackCommand:
 
@@ -29,6 +29,15 @@ class AttackCommand:
         for entity in current_room.entities:
             if entity.name != entity_name:
                 continue
+            if type(entity) == characters.DeadBody:
+                current_room.entities.remove(entity)
+                return [{
+                    "message": "you removed the corpse",
+                    "dest": {
+                        "type": "uuid",
+                        "value": attacker.uuid
+                    }
+                }]
             result = attacker.attack(entity)
             events = attacker.default_attack_events(entity, result)
             return events
