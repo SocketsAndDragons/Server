@@ -85,14 +85,24 @@ class LookCommand:
         else:
             message += "There is nothing here.\n"
 
+        doors = []
         if room.has_north_door():
-            message += "There is a door to the north\n"
+            doors.append("north")
         if room.has_east_door():
-            message += "There is a door to the east\n"
+            doors.append("east")
         if room.has_south_door():
-            message += "There is a door to the south\n"
+            doors.append("south")
         if room.has_west_door():
-            message += "There is a door to the west\n"
+            doors.append("west")
+
+        door_str = "There are doors in the " + ", ".join(doors)
+        index = door_str.rfind(', ')
+        if index != -1:
+            door_str = door_str.split(', ')
+            door_str[-1] = "and " + door_str[-1]
+            door_str = ", ".join(door_str)
+
+        message += door_str + '\n'
 
         message += "It is very dark. You will like be eaten by a grue.\n"
         return [{
