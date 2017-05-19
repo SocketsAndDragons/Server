@@ -602,7 +602,7 @@ class StatsCommand:
 class DisconnectCommand:
 
     def __init__(self):
-        pass
+        self.short_help_msg = "Quit the game, dummy"
 
     def help(self):
         return "disconencts the client"
@@ -626,4 +626,3 @@ class DisconnectCommand:
                 "y": y
             }
         }]
-

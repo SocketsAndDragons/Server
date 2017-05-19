@@ -6,6 +6,7 @@ class AttackCommand:
 
     def __init__(self):
         self.action_cost = 1
+        self.short_help_msg = "Injure the bad people"
 
     def help(self):
         return "attack another entity"
