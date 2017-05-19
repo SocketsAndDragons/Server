@@ -49,6 +49,7 @@ class LookCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "Describes the room you're in."
+        self.action_cost = 0
 
     def help(self):
         shell.Shell().display(self.short_help_msg)
@@ -65,7 +66,6 @@ class LookCommand:
 
         players = []
         things = []
-
         for entity in room.entities:
             if isinstance(entity, characters.Player):
                 if entity.uuid != src:
@@ -75,15 +75,15 @@ class LookCommand:
 
         if len(players) > 0:
             player_string = ", ".join(players)
-            message += "You see " + player_string + "\n"
+            message += player_string + " are in the room.\n"
         else:
             message += "You see no other people.\n"
 
         if len(things) > 0:
-            thing_string = ", ".join(things)
-            message += "You see " + thing_string + "\n"
+            thing_string = ".\nYou see a ".join(things)
+            message += "You see a " + thing_string + "\n"
         else:
-            message += "You see no other things.\n"
+            message += "There is nothing here.\n"
 
         if room.has_north_door():
             message += "There is a door to the north\n"
@@ -104,6 +104,7 @@ class LookCommand:
             }
         }]
 
+
 def get_players_room(uuid):
     server = dungeon_server.Server()
     x, y = server.map.findPlayerByUuid(uuid)
@@ -115,6 +116,7 @@ class MoveCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "Move to the room in the indicated direction."
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -139,28 +141,60 @@ class MoveCommand:
 
         return self.get_events(src, direction, old_addr, (x,y))
 
-    def get_events(self, uuid, move_direction, room_entered, room_exited):
-        player_name = dungeon_server.Server().players[uuid].name
+    def get_events(self, uuid, move_direction, room_exited_addr, room_entered_addr):
+        player = dungeon_server.Server().players[uuid]
+        room_entered = dungeon_server.Server().map.get_room(room_entered_addr[0], room_entered_addr[1])
+        room_exited = dungeon_server.Server().map.get_room(room_exited_addr[0], room_exited_addr[1])
 
-        return [{
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "room", "x": room_entered[0], "y": room_entered[1]},
-            "message": player_name + " left the room to the " + move_direction + "."
-        },
-        {
-            "src": player_name,
-            "name": "move",
-            "dest": {"type": "room", "exclude": [uuid], "x": room_exited[0], "y": room_exited[1]},
-            "message": "player " + player_name + " entered the room."
-        },
-        {
-            "src": player_name,
+        events = []
+        for entity in room_entered.entities:
+            if not hasattr(entity, "on_enter"):
+                continue
+            if entity is player:
+                continue
+            events += entity.on_enter(player)
+
+        for entity in room_exited.entities:
+            if not hasattr(entity, "on_exit"):
+                continue
+            events += entity.on_exit(player)
+
+        events.append({
+            "src": player.name,
             "name": "move",
             "dest": {"type": "uuid", "value": uuid},
             "success": True,
             "message": "you moved to the " + move_direction
-        }]
+        })
+
+        # events = [{
+        #     "src": player.name,
+        #     "name": "move",
+        #     "dest": {"type": "room", "exclude": [uuid], "x": room_entered_addr[0], "y": room_entered_addr[1]},
+        #     "message": "player " + player.name + " entered the room."
+        # },
+        # {
+        #     "src": player.name,
+        #     "name": "move",
+        #     "dest": {"type": "room", "x": room_exited_addr[0], "y": room_exited_addr[1]},
+        #     "message": player.name + " left the room to the " + move_direction + "."
+        # },
+        # {
+        #     "src": player.name,
+        #     "name": "move",
+        #     "dest": {"type": "uuid", "value": uuid},
+        #     "success": True,
+        #     "message": "you moved to the " + move_direction
+        # }]
+
+        # for entity in room_entered.entities:
+        #     if type(entity) == characters.Monster:
+        #         events.append({
+        #             "message": "beware, a " + entity.name + " lurks in the room.",
+        #             "dest": {"type": "uuid", "value": uuid}
+        #         })
+
+        return events
 
     def get_new_room_addr(self, x, y, direction):
         if direction == room.NORTH:
@@ -197,6 +231,7 @@ class PingCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "is the server alive?"
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -218,6 +253,7 @@ class SayCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "say something to other players in the same room. This does not cost an action."
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -243,6 +279,7 @@ class ShoutCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "say something to other players in the same room. This does not cost an action."
+        self.action_cost = 1
 
     def help(self):
         print(self.short_help_msg)
@@ -267,6 +304,7 @@ class WhisperCommand:
     def __init__(self, map):
         self.map = map
         self.short_help_msg = "say something to other players in the same room. This does not cost an action."
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -306,18 +344,19 @@ class WhisperCommand:
 class ExamineEntityCommand:
 
     def __init__(self):
+        self.action_cost = 0
         self.short_help_msg = "shows the type of the entity"
 
     def help(self):
         print("shows the type of the entity")
 
     def execute(self, args, src):
-        if len(args) != 2:
+        entity_name = " ".join(args[1:])
+        if len(args) < 2:
             msg = "malformed examine command, try 'examine [thing]'"
             dungeon_server.Server().send_error_event(msg, src)
             return []
 
-        entity_name = args[1]
         current_room = get_players_room(src)
         for entity in current_room.entities:
             if entity.name == entity_name:
@@ -345,18 +384,20 @@ class ExamineEntityCommand:
 class InvCommand:
 
     def __init__(self):
+        self.action_cost = 0
         self.short_help_msg = "displays all the items in the player's inventory"
+
     def help(self):
         print("displays all the items in the player's inventory")
 
     def execute(self, args, src):
         player = dungeon_server.Server().players[src]
-        msg = ''
-        for item in player.inventory.items:
-            msg += item.name + '\n'
-
-        if msg == '':
-            msg = "there are no items in your inventory"
+        msg = player.inventory.describe()
+        # for item in player.inventory.items:
+        #     msg += item.name + '\n'
+        #
+        # if msg == '':
+        #     msg = "there are no items in your inventory"
 
         return [{
             "message": msg,
@@ -370,6 +411,7 @@ class InvCommand:
 class TakeFromCommand:
 
     def __init__(self):
+        self.action_cost = 1
         self.short_help_msg = "take an item from a container and place it in the character's inventory"
 
     def help(self):
@@ -435,8 +477,8 @@ class TakeFromCommand:
 class GiveToCommand:
 
     def __init__(self):
+        self.action_cost = 1
         self.short_help_msg = "Give an item to someone"
-        pass
 
     def help(self):
         print("give an item from your inventory to the designated entity")
@@ -494,6 +536,7 @@ class UseItemCommand:
 
     def __init__(self):
         self.short_help_msg = "uses an item from the player's inventory"
+        self.action_cost = 1
 
     def help(self):
         print(self.short_help_msg)
@@ -525,31 +568,11 @@ class UseItemCommand:
         }]
 
 
-# class LookCommand:
-#
-#     def help(self):
-#         print("lists all entities in the room")
-#
-#     def execute(self, args, src):
-#         player = dungeon_server.Server().players[src]
-#         current_room = get_players_room(src)
-#         msg = 'room:\n\t'
-#         for entity in current_room.entities:
-#             if entity.name == player.name:
-#                 continue
-#             msg += entity.name
-#             msg += '\n\t'
-#
-#         return [{
-#             "message": msg,
-#             "dest": {"type": "uuid", "value": src}
-#         }]
-
-
 class StatsCommand:
 
     def __init__(self):
         self.short_help_msg = "uses an item from the player's inventory"
+        self.action_cost = 0
 
     def help(self):
         print(self.short_help_msg)
@@ -557,15 +580,38 @@ class StatsCommand:
     def execute(self, args, src):
         server = dungeon_server.Server()
         player = server.players[src]
-        msg = player.name + ':\n\t'
-        msg += "HP: " + str(player.get_stat("maxHp") - player.wounds) + ' / ' + str(player.get_stat("maxHp"))
-        msg += '\n\t'
-        for stat in player.stats:
-            msg += stat + ': '
-            msg += str(player.stats[stat])
-            msg += '\n\t'
+        msg = player.display_stats()
 
         return [{
             "message": msg,
             "dest": {"type": "uuid", "value": src}
         }]
+
+class DisconnectCommand:
+
+    def __init__(self):
+        pass
+
+    def help(self):
+        return "disconencts the client"
+
+    def execute(self, args, src):
+        server = dungeon_server.Server()
+        player = server.players[src]
+        x, y = server.map.findPlayerByUuid(src)
+        current_room = server.map.get_room(x, y)
+        current_room.entities.remove(player)
+
+        del server.players[src]
+        del server.threads[src]
+        del server.clients[src]
+
+        return [{
+            "message": player.name + " has vanished in a poof of smoke!",
+            "dest": {
+                "type": "room",
+                "x": x,
+                "y": y
+            }
+        }]
+

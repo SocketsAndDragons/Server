@@ -7,6 +7,7 @@ import logging
 # uncomment to see detailed info
 #logging.basicConfig(level=logging.INFO)
 
+
 def peel_size(data,pos):
 	size = int.from_bytes(data[pos:pos+4],byteorder='big')
 	return (size,pos+4)
@@ -42,42 +43,44 @@ def stream_parse(socket,queue,tag=None,format='dict'):
 
 	# Don't thrash my CPU so hard
 	time.sleep(0.001)
+	try:
+		while True:
+			# A packet is done.
+			if size_left <= 0:
+				logging.info("Packet done: " + msg)
+				if format == 'json':
+					queue.put((tag,msg))
+				elif format == 'dict':
+					queue.put((tag,json.loads(msg)))
+				size = None
+				msg = ""
+				size_left = 1
 
-	while True:
-		# A packet is done.
-		if size_left <= 0:
-			logging.info("Packet done: " + msg)
-			if format == 'json':
-				queue.put((tag,msg))
-			elif format == 'dict':
-				queue.put((tag,json.loads(msg)))
-			size = None
-			msg = ""
-			size_left = 1
-
-		# We're out of data.
-		if pos >= packet_size:
-			data = prev_data + socket.recv(1024)
-			pos = 0
-			packet_size = len(data)
+			# We're out of data.
+			if pos >= packet_size:
+				data = prev_data + socket.recv(1024)
+				pos = 0
+				packet_size = len(data)
 
 
-		while pos < packet_size and size_left > 0:
-			# Start reading a new packet.
-			if not size:
-				# We have enough data to peel off the size
-				if pos + 4 <= packet_size:
-					(size,pos) = peel_size(data,pos)
-					size_left = size
-				# Not enough bytes. Keep these bytes, and request more data
+			while pos < packet_size and size_left > 0:
+				# Start reading a new packet.
+				if not size:
+					# We have enough data to peel off the size
+					if pos + 4 <= packet_size:
+						(size,pos) = peel_size(data,pos)
+						size_left = size
+					# Not enough bytes. Keep these bytes, and request more data
+					else:
+						prev_data = data[pos:packet_size]
+						pos = packet_size
+				# We're reading a packet
 				else:
-					prev_data = data[pos:packet_size]
-					pos = packet_size
-			# We're reading a packet
-			else:
-				(new_json, pos, size_left) = peel_json(data, pos, size_left)
-				msg += new_json.decode("utf-8")
-				logging.info("Status: %d, %d, %d",pos,size,size_left)
+					(new_json, pos, size_left) = peel_json(data, pos, size_left)
+					msg += new_json.decode("utf-8")
+					logging.info("Status: %d, %d, %d",pos,size,size_left)
+	except ConnectionResetError as e:
+		queue.put([tag, ["disconnect"]])
 
 def stream_send_dict(socket,dict):
 	stream_send(socket, json.dumps(dict))
