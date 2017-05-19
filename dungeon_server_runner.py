@@ -37,6 +37,8 @@ server.cmds["disconnect"] = playerCmds.DisconnectCommand()
 
 server.cmds["attack"] = combatCmds.AttackCommand()
 
+server.cmds["nuke"] = gmCmds.NukeCommand()
+
 server.dest_rules["uuid"] = destination.UuidDestRule()
 server.dest_rules["room"] = destination.RoomDestRule()
 server.dest_rules["gm"] = destination.GmDestRule()
