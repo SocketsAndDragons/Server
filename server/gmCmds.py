@@ -1,5 +1,15 @@
 from server import characters
+import dungeon_server
 
+class NukeCommand:
+	def __init__(self):
+		self.short_help_msg = "nuculur bomb"
+
+	def execute(self, args, src):
+		for entity in dungeon_server.Server().players:
+			print(entity, " died of asbestos")
+		return []
+		
 class MapCommand:
 
     def __init__(self, map, map_rules=None):

@@ -28,6 +28,8 @@ server.cmds["use"] = playerCmds.UseItemCommand()
 server.cmds["stats"] = playerCmds.StatsCommand()
 server.cmds["help"] = playerCmds.HelpCommand()
 
+server.cmds["nuke"] = gmCmds.NukeCommand()
+
 server.dest_rules["uuid"] = destination.UuidDestRule()
 server.dest_rules["room"] = destination.RoomDestRule()
 server.dest_rules["gm"] = destination.GmDestRule()
