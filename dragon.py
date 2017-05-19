@@ -3,6 +3,7 @@ import argparse
 import json
 import time
 import logging
+import sys
 
 # uncomment to see detailed info
 #logging.basicConfig(level=logging.INFO)
@@ -81,6 +82,7 @@ def stream_parse(socket,queue,tag=None,format='dict'):
 					logging.info("Status: %d, %d, %d",pos,size,size_left)
 	except ConnectionResetError as e:
 		queue.put([tag, ["disconnect"]])
+		sys.exit(-2)
 
 def stream_send_dict(socket,dict):
 	stream_send(socket, json.dumps(dict))

@@ -104,7 +104,8 @@ class Server:
             self.send_event({
                 "message": self.players[uuid].name + " has entered the dungeon.",
                 "dest": {
-                    "type": "all"
+                    "type": "all",
+                    "exclude": [uuid]
                 }
             })
 
@@ -166,7 +167,6 @@ class Server:
                 print(e)
                 print(msg)
                 self.send_error_event(msg, src)
-                raise e
 
         def resolve_action_points(self, action_cost, src):
             if action_cost <= 0:
