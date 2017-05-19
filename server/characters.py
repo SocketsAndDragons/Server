@@ -181,7 +181,7 @@ class Character:
             target_msg = "You were hit by " + self.name + " and dealt " + str(final_dmg) + " damage."
             observer_msg = target.name + " was hit by " + self.name + " and dealt " + str(final_dmg) + " damage."
         else:
-            attacker_msg = target.name + "evaded your attack!"
+            attacker_msg = target.name + " evaded your attack!"
             target_msg = "You evaded an attack from " + self.name
             observer_msg = target.name + " evaded an attack from " + self.name
 

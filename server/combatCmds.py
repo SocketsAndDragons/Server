@@ -14,6 +14,15 @@ class AttackCommand:
         server = dungeon_server.Server()
         attacker = server.players[src]
         entity_name = " ".join(args[1:])
+        if entity_name == attacker.name:
+            return [{
+                "message": "you cannot attack yourself!",
+                "dest": {
+                    "type": "uuid",
+                    "value": src
+                }
+            }]
+
         x, y = server.map.findPlayerByUuid(src)
         current_room = server.map.get_room(x, y)
         for entity in current_room.entities:
