@@ -7,7 +7,6 @@ import threading
 import queue
 import time
 import json
-import readline
 
 THREADS = []
 USERNAME = None
